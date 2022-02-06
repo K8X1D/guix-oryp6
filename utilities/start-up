@@ -1,0 +1,45 @@
+# ENV VARIABLE
+# wm
+DIR=$HOME/.guix-profile
+CC=gcc # for rust
+BROWSER=brave 
+
+export PATH=/home/k8x1d/.local/bin:$PATH
+export PATH=/home/k8x1d/.cargo/bin:$PATH
+export PATH=/nix/var/nix/profiles/per-user/k8x1d/profile/bin:$PATH
+export RSTUDIO_CHROMIUM_ARGUMENTS="--disable-gpu"
+
+# redshift
+redshift -l 45.52678:-73.28806 -t 6500:3000 &
+
+# test
+#xrandr --setprovideroutputsource NVIDIA-G0 modesetting
+xrandr --output HDMI-1-0 --mode 1600x900 --above eDP-1
+#xrandr --output HDMI-1-0 --mode 1920x1080 --above eDP-1
+# sound
+pipewire &
+pipewire-pulse &
+wireplumber &
+# Touchpad
+#xinput set-prop "PNP0C50:00 06CB:CD79 Touchpad" "libinput Tapping Enabled" 1
+xinput set-prop "PNP0C50:00 06CB:CD79 Touchpad" "Synaptics Tap Action" 1 1 1 1 1 1 1
+# lock if inactivity
+#xautolock -time 10 -locker i3lock -u -i /home/k8x1d/Images/guix/lockscreens/guix-silver-checkered-1920x1080.png
+# notifications
+dunst &
+# set brightness
+#light -S 5
+# compositor
+picom &
+# Keyboard option
+setxkbmap -layout "ca" -option "ctrl:nocaps" -option "altwin:menu_win"
+#xmodmap $HOME/.Xmodmap2
+xset r rate 300 50
+# start music player daemon
+mpd
+## Wallpaper
+feh --bg-fill /home/k8x1d/Images/guix/wallpapers/guix-checkered-1920x1080.png
+# emacs daemon
+#emacs --daemon
+# status
+slstatus &

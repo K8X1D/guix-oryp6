@@ -1,0 +1,8 @@
+
+
+push modif programme
+(applique gc pour être sûr de build nouvelle version)
+guix install paquet -L ~/Logiciels/guix/guix/k8x1d/packages
+ajustement hash dans channel
+ajustement hash du channel dans list channel
+guix pull
