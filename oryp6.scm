@@ -331,7 +331,10 @@
    (service nix-service-type)
    (screen-locker-service i3lock) ;; necessary to unlock i3lock screen
    ;; pm management
-   (service tlp-service-type)
+   (service tlp-service-type
+            (tlp-configuration 
+              (energy-perf-policy-on-ac "normal")
+            ))
    (service thermald-service-type)
    
     ;; mcron

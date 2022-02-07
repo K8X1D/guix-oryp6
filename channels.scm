@@ -23,11 +23,11 @@
 
 (channel
   (name 'k8x1d)
-  (url "https://gitlab.com/K8X1D/guix")
+  (url "https://gitlab.com/oryp6/guix_set-up/guix-channel")
   (branch "main")
   (introduction
    (make-channel-introduction
-    "f24e457db49ab6bee4252aecbfb2751404be855b"
+    "884dac694f097d72abc96188ee26b9569d0cc692"
     (openpgp-fingerprint
      "E109 BDB7 58D9 36A9 F4E5  D749 7769 412E D873 CFB8")))
  )
