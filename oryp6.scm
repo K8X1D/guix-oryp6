@@ -226,7 +226,7 @@
  ;; FILE-SYSTEMS CONFIGURATION
   (file-systems (append
                  (list (file-system
-                         (device (uuid "4c1e6920-a788-4913-9d24-1e82c32b2383"))
+                         (device (uuid "86cef913-bc63-42ee-8cd8-569bfbbbef83"))
                          (mount-point "/")
                          (type "ext4"))
 			(file-system
@@ -238,7 +238,7 @@
                          (mount-point "/media")
                          (type "ext4"))
                        (file-system
-                         (device (uuid "7C94-8C19" 'fat))
+                         (device (uuid "9296-69B6" 'fat))
                          (mount-point "/boot/efi")
                          (type "vfat")))
                  %base-file-systems))
@@ -246,7 +246,7 @@
     (swap-devices (list
                    (swap-space
                      (target
-                       (uuid "61d87243-f886-49e8-b968-dbe6f76be8c4"))))) ;; test
+                       (uuid "b00f45e3-a8d4-4eef-8332-d0d3911d0cca"))))) ;; test
 
  ;; USER CONFIGURATION
  (users (cons (user-account
@@ -284,7 +284,7 @@
     font-dejavu
     font-juliamono
     ;; dwm set-up 
-    k8x1d-dwm k8x1d-st k8x1d-slstatus dmenu
+    k8x1d-dwm k8x1d-st dmenu
     ;; strumpwm set-up 
     sbcl stumpwm
     ;; guile-wm set-up 
@@ -406,3 +406,9 @@
                     ))))
            %my-desktop-services))))
 
+;;/dev/nvme0n1p1: UUID="9296-69B6" BLOCK_SIZE="512" TYPE="vfat" PARTLABEL="boot" PARTUUID="617da956-4cd5-47ee-83a4-58c662a42cc1"
+;;/dev/nvme0n1p2: UUID="b00f45e3-a8d4-4eef-8332-d0d3911d0cca" TYPE="swap" PARTLABEL="swap" PARTUUID="71c4af46-6bdf-4706-a3aa-3596159a1cda"
+;;/dev/nvme0n1p3: UUID="86cef913-bc63-42ee-8cd8-569bfbbbef83" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="guix_root" PARTUUID="4901660d-dc7a-434f-b461-24fc6caaae2d"
+;;/dev/nvme0n1p6: UUID="5085f59e-89d2-48cf-abd6-4cd673816c65" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="guix_home" PARTUUID="6ad52eb3-ac47-1f42-a076-032049efbf44"
+;;/dev/nvme0n1p7: UUID="3719b136-d36b-4e50-b1b2-edee3789ffe8" BLOCK_SIZE="4096" TYPE="ext4" PARTUUID="10a7315f-e0a9-8c4b-9c95-809e9d37659c"
+;;/dev/sda2: SEC_TYPE="msdos" UUID="C920-B8AE" BLOCK_SIZE="512" TYPE="vfat" PARTUUID="5e45b925-02"

@@ -38,6 +38,7 @@
     ;;"swaylock"
     ;;"swaybg"
     "git"
+    "openssh"
 
     ;; sound
     "mpd"

@@ -7,6 +7,7 @@
     (raw "firefox")
     "nyxt"
 
+    "youtube-dl-gui"
     ;;(raw "rstudio")
     ;;"rstudio"
     (raw "gimp")

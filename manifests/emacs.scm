@@ -5,8 +5,10 @@
 (packages->manifest
  (fixpkgs
  '(;;  Emacs
-    "emacs-pgtk-native-comp" ;; emacs w wayland support, crash dwl... issue open...
-    ;; package management
+    ;;"emacs-pgtk-native-comp" ;; emacs w wayland support, crash dwl... issue open...
+    "emacs-native-comp"
+;; package management
+"git"
     ;;"emacs-use-package"
     ;;;; utilities
     ;;"emacs-no-littering"
