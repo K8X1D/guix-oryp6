@@ -11,6 +11,7 @@
 (use-modules (nongnu packages linux)
              (nongnu system linux-initrd))
 (use-modules (k8x1d packages xorg))
+;;(use-modules (k8x1d services docker)) ;; doesn't work
 (use-modules (srfi srfi-1)) ;; "remove"
 (use-service-modules xorg
                      linux
@@ -34,6 +35,7 @@
                      wm ;; stumpwm
                      lisp
                      guile-wm
+		             ;;docker
                      ;terminals ;; alacritty
                      ;xdisorg ;; redshift
                      shells ;; zsh
@@ -79,7 +81,6 @@
 ;;(define nvidia-config 
 ;;  (plain-file "nvidia.conf"
 ;;              "options nvidia NVreg_DynamicPowerManagement=0x02"))
-
 
 ;; special xorg config.
 ;; adds nvidia xorg module and transforms xorg-server package
@@ -308,7 +309,7 @@
    ;; test sddm
    (service sddm-service-type
             (sddm-configuration
-              (themes-directory "/media/Logiciels/guix/sddm/themes")
+              (themes-directory "/media/Logiciels/guix_set-up/sddm/themes")
               (theme "sugar-dark")
               ;;(sddm (fixpkg sddm)) ;; seem to cause black screen
               ;;(xdisplay-start "/home/k8x1d/start-up")
@@ -331,10 +332,34 @@
    (service nix-service-type)
    (screen-locker-service i3lock) ;; necessary to unlock i3lock screen
    ;; pm management
+   ;;(service tlp-service-type
+   ;;         (tlp-configuration 
+   ;;           ;;(cpu-scaling-governor-on-ac (list "powersave")) ;; not diff alon on temp
+   ;;           ;;(energy-perf-policy-on-ac "normal") ;; not diff alon on temp
+   ;;           ;;(sched-powersave-on-ac? #t) ;; not diff alon on temp
+   ;;           ;;(max-lost-work-secs-on-ac 60) ;; not diff alon on temp
+   ;;           (sched-powersave-on-ac? #t) ;; from 80 to 70
+   ;;         ))
+
    (service tlp-service-type
             (tlp-configuration 
-              (energy-perf-policy-on-ac "normal")
+              (cpu-scaling-governor-on-ac (list "powersave")) ;; not diff alon on temp
+              (energy-perf-policy-on-ac "powersave") ;; not diff alon on temp
+              (sched-powersave-on-ac? #t) ;; not diff alon on temp
+              (max-lost-work-secs-on-ac 60) ;; not diff alon on temp
+	      (disk-idle-secs-on-ac 2)
+	      (cpu-min-perf-on-ac 0)
+	      (cpu-max-perf-on-ac 50)
+	      ;;(cpu-boost-on-ac? enabled)
+	      (pcie-aspm-on-ac "powersave")
+          (start-charge-thresh-bat0 40)
+          (stop-charge-thresh-bat0 80)
+          (runtime-pm-on-ac "auto")
             ))
+
+
+
+
    (service thermald-service-type)
    
     ;; mcron

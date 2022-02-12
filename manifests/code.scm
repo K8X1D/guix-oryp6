@@ -7,7 +7,6 @@
     ;; programming-support
     ;; 
     ;; C
-    ;;"libomp"
     "gcc-toolchain"
     "gfortran-toolchain"
     "glibc-bootstrap"
@@ -36,6 +35,7 @@
     "libgit2-glib"
     "openssl"
     "pkg-config"
+    "libomp" ;; for data.table
 
     ;; julia
     "libpqxx" ;; postgresql
