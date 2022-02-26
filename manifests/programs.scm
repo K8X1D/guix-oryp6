@@ -5,7 +5,21 @@
     ;; browsers
     (raw "qutebrowser")
     (raw "firefox")
+
+
+
+    ;;;;;;;;;;
+    ;; nyxt ;;
+    ;;;;;;;;;;
     "nyxt"
+    ;; video support through gstreamer
+    "gst-libav"
+    "gst-plugins-bad"
+    "gst-plugins-base"
+    "gst-plugins-good"
+    "gst-plugins-ugly"
+
+
 
     "youtube-dl-gui"
     ;;(raw "rstudio")

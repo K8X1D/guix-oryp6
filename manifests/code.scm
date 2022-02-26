@@ -6,18 +6,6 @@
     ;; 
     ;; programming-support
     ;; 
-    ;; C
-    "gcc-toolchain"
-    "gfortran-toolchain"
-    "glibc-bootstrap"
-    ;;"gcc-bootstrap"
-    ;;"gccmakedep"
-    ;;"gcc-objc"
-    ;;"gcc-objc++"
-    ;;"gccgo"
-    "cmake"
-    "make"
-    ;;"libstdc++-doc"
     ;; R
     "r-minimal"
     "r-remotes"
@@ -31,11 +19,8 @@
     "mariadb-connector-c"
     "libxml2"
     "curl"
-    "libgit2"
-    "libgit2-glib"
-    "openssl"
-    "pkg-config"
-    "libomp" ;; for data.table
+    ;;"libgit2"
+    ;;"libgit2-glib"
 
     ;; julia
     "libpqxx" ;; postgresql
@@ -46,10 +31,7 @@
     "rust-cargo"
     ;; others
     ;;"postgresql"
-    ;;"git"
-    "openssh"
     "docker-compose"
     ;; texlive
     "texlive"
-
 )))

@@ -20,7 +20,8 @@
                      databases
                      sddm
                      mcron
-                     ;;docker
+                     docker
+		     cups
                      desktop ;; %desktop-services
                      networking ;; modem-manager-service-type
                      )
@@ -35,7 +36,8 @@
                      wm ;; stumpwm
                      lisp
                      guile-wm
-		             ;;docker
+		     docker
+		     cups
                      ;terminals ;; alacritty
                      ;xdisorg ;; redshift
                      shells ;; zsh
@@ -145,6 +147,7 @@
                                                           (authorized-keys
                                                             (append (list (local-file "./signing-key.pub"))
                                                                     %default-authorized-guix-keys))))
+		   (delete gdm-service-type)
                    ))
 
 
@@ -226,7 +229,7 @@
  ;; FILE-SYSTEMS CONFIGURATION
   (file-systems (append
                  (list (file-system
-                         (device (uuid "86cef913-bc63-42ee-8cd8-569bfbbbef83"))
+                         (device (uuid "01bdb4b7-6d40-4aa1-8c90-60ff84b2e8b0"))
                          (mount-point "/")
                          (type "ext4"))
 			(file-system
@@ -238,7 +241,7 @@
                          (mount-point "/media")
                          (type "ext4"))
                        (file-system
-                         (device (uuid "9296-69B6" 'fat))
+                         (device (uuid "2C7C-6390" 'fat))
                          (mount-point "/boot/efi")
                          (type "vfat")))
                  %base-file-systems))
@@ -261,8 +264,8 @@
                                         ;;"kvm"
                                         "tty"
                                         "input"
-                                        ;;"docker"
-                                        "postgres"
+                                        "docker"
+                                        ;;"postgres"
                                         "lp"        ;; control bluetooth devices
                                         "audio"     ;; control audio devices
                                         "video")))  ;; control video devices
@@ -332,15 +335,6 @@
    (service nix-service-type)
    (screen-locker-service i3lock) ;; necessary to unlock i3lock screen
    ;; pm management
-   ;;(service tlp-service-type
-   ;;         (tlp-configuration 
-   ;;           ;;(cpu-scaling-governor-on-ac (list "powersave")) ;; not diff alon on temp
-   ;;           ;;(energy-perf-policy-on-ac "normal") ;; not diff alon on temp
-   ;;           ;;(sched-powersave-on-ac? #t) ;; not diff alon on temp
-   ;;           ;;(max-lost-work-secs-on-ac 60) ;; not diff alon on temp
-   ;;           (sched-powersave-on-ac? #t) ;; from 80 to 70
-   ;;         ))
-
    (service tlp-service-type
             (tlp-configuration 
               (cpu-scaling-governor-on-ac (list "powersave")) ;; not diff alon on temp
@@ -357,11 +351,9 @@
           (runtime-pm-on-ac "auto")
             ))
 
-
-
-
-   (service thermald-service-type)
+   ;;(service thermald-service-type) ;; removed for test purposes
    
+   ;; TODO battery-alert job not working
     ;; mcron
     (simple-service 'my-cron-jobs
                     mcron-service-type
@@ -374,41 +366,27 @@
   ;;             ("RSTUDIO_CHROMIUM_ARGUMENTS" . "--disable-seccomp-filter-sandbox") ;; rstudio temp fix for bas qtwebengine
   ;;             ))
    ;; databases and container 
-   ;;(service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root 
+   (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root 
    (service postgresql-service-type
             (postgresql-configuration
               (data-directory "/media/Data/pgdata/14")
               (postgresql postgresql-14)))
-   (service postgresql-role-service-type
-               (postgresql-role-configuration
-                (roles
-                 (list (postgresql-role
-                        (name "k8x1d")
-                        (permissions '(superuser))
-                        (create-database? #t))))))
-   ;; default services, with some packages removed for faster build
-   (remove (lambda (service)
-             (or (member (service-kind service)
-                         (list
-                          gdm-service-type
-                          ;;modem-manager-service-type
-                          usb-modeswitch-service-type
-                          ;;wpa-supplicant-service-type
-                          ;;network-manager-service-type
-                          geoclue-service-type
-                          colord-service-type))
-                 (member
-                  (struct-ref (service-kind service) 0)
-                  '(
-                    screen-locker
-                    mount-setuid-helpers
-                    ;;network-manager-applet
-                    ))))
-           %my-desktop-services))))
+    (service cups-service-type
+             (cups-configuration
+               (web-interface? #t)
+               (extensions
+                 (list cups-filters epson-inkjet-printer-escpr hplip-minimal))))  ;; (service postgresql-role-service-type
+  ;;             (postgresql-role-configuration
+  ;;              (roles
+  ;;               (list (postgresql-role
+  ;;                      (name "k8x1d")
+  ;;                      (permissions '(superuser))
+  ;;                      (create-database? #t))))))
+   ;; TODO Clean destop services through my-desktop-service
+   ;; (remove (lambda (service)
+   ;;             (eq? (service-kind service) gdm-service-type))
+   ;;         %my-desktop-services)))
 
-;;/dev/nvme0n1p1: UUID="9296-69B6" BLOCK_SIZE="512" TYPE="vfat" PARTLABEL="boot" PARTUUID="617da956-4cd5-47ee-83a4-58c662a42cc1"
-;;/dev/nvme0n1p2: UUID="b00f45e3-a8d4-4eef-8332-d0d3911d0cca" TYPE="swap" PARTLABEL="swap" PARTUUID="71c4af46-6bdf-4706-a3aa-3596159a1cda"
-;;/dev/nvme0n1p3: UUID="86cef913-bc63-42ee-8cd8-569bfbbbef83" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="guix_root" PARTUUID="4901660d-dc7a-434f-b461-24fc6caaae2d"
-;;/dev/nvme0n1p6: UUID="5085f59e-89d2-48cf-abd6-4cd673816c65" BLOCK_SIZE="4096" TYPE="ext4" PARTLABEL="guix_home" PARTUUID="6ad52eb3-ac47-1f42-a076-032049efbf44"
-;;/dev/nvme0n1p7: UUID="3719b136-d36b-4e50-b1b2-edee3789ffe8" BLOCK_SIZE="4096" TYPE="ext4" PARTUUID="10a7315f-e0a9-8c4b-9c95-809e9d37659c"
-;;/dev/sda2: SEC_TYPE="msdos" UUID="C920-B8AE" BLOCK_SIZE="512" TYPE="vfat" PARTUUID="5e45b925-02"
+            %my-desktop-services))
+ ;; Allow resolution of '.local' host names with mDNS
+    (name-service-switch %mdns-host-lookup-nss))

@@ -6,6 +6,8 @@
 
     ;; gpg
     "pinentry"
+    "password-store"
+    "gnupg"
 
     ;; driver 
     ;;"xf86-input-libinput"
@@ -39,6 +41,9 @@
     ;;"swaybg"
     "git"
     "openssh"
+    "openssl"
+    "pkg-config"
+    "libomp" ;; for data.table
 
     ;; sound
     "mpd"
@@ -52,17 +57,37 @@
     "youtube-dl"
     "youtube-dl-gui"
 
+    ;; Compilation support
+    "gcc-toolchain"
+    "gfortran-toolchain"
+    "glibc-bootstrap"
+    "make"
+    "cmake"
+    "cmake-shared"
+
+    ;;"gccmakedep"
+    ;;;;"gcc-bootstrap" ;; add confliting module for gcc 
+    ;;"gcc-objc++"
+
+    ;; Remote connection
+    "openconnect"
+    "rdesktop"
+
     ;; desktop programs
     "adwaita-icon-theme"
     ;;"libreoffice"
     "k8x1d-slstatus"
     "dmenu"
-    "flatpak"
     "unzip"
     "fzf"
     "zathura"
     "zathura-pdf-poppler"
     "zathura-pdf-mupdf"
+
+    ;; third party applications
+    "flatpak"
+    "xdg-desktop-portal"
+    "xdg-desktop-portal-gtk"
 
 )))
 

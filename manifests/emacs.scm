@@ -7,8 +7,65 @@
  '(;;  Emacs
     ;;"emacs-pgtk-native-comp" ;; emacs w wayland support, crash dwl... issue open...
     "emacs-native-comp"
-;; package management
-"git"
+    "coreutils"
+    "findutils"
+
+
+;; rational-completion
+"emacs-vertico"
+
+
+
+;; k8x1d-rational-code
+"emacs-julia-mode"
+;;"emacs-ess" error
+
+
+;;; julia vterm
+"emacs-vterm"
+
+
+
+
+
+"emacs-alert"
+"emacs-all-the-icons"
+"emacs-all-the-icons-dired"
+"emacs-annalist"
+"emacs-company"
+"emacs-dash"
+
+
+
+
+
+
+
+
+
+
+"emacs-no-littering"
+
+;; ui
+"emacs-doom-themes"
+"emacs-doom-modeline"
+"emacs-modus-themes"
+"emacs-diminish"
+"emacs-minions"
+"emacs-rainbow-delimiters"
+
+
+;; keybindings
+"emacs-undo-tree"
+"emacs-evil"
+"emacs-evil-collection"
+"emacs-evil-surround"
+"emacs-evil-org"
+"emacs-general"
+"emacs-which-key"
+
+
+
     ;;"emacs-use-package"
     ;;;; utilities
     ;;"emacs-no-littering"
