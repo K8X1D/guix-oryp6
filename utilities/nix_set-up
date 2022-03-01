@@ -2,15 +2,13 @@ nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
 nix-env -i \
   julia-bin \
-  neovim \
   brave \
   zotero \
   yambar \
   yarn \
   nodejs \
   curl \
-  system76-firmware \
-  tree-sitter
+  system76-firmware
 
 
 ## wayland wm
