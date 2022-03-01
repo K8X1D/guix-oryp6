@@ -351,7 +351,7 @@
           (runtime-pm-on-ac "auto")
             ))
 
-   ;;(service thermald-service-type) ;; removed for test purposes
+   ;;(service thermald-service-type) ;; cannot be build, to investigate
    
    ;; TODO battery-alert job not working
     ;; mcron

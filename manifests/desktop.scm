@@ -9,7 +9,7 @@
     "password-store"
     "gnupg"
 
-    ;; driver 
+    ;; driver
     ;;"xf86-input-libinput"
     ;;"libinput"
 
@@ -31,11 +31,11 @@
     "xrandr"
     "light"
     "setxkbmap"
-    "xclip" 
+    "xclip"
     "feh"
     ;;"picom"
     "dunst"
-    "redshift" 
+    "redshift"
     ;;"swayidle"
     ;;"swaylock"
     ;;"swaybg"
@@ -60,13 +60,14 @@
     ;; Compilation support
     "gcc-toolchain"
     "gfortran-toolchain"
-    "glibc-bootstrap"
+    ;;"glibc-bootstrap"
+    "glibc"
     "make"
     "cmake"
     "cmake-shared"
 
     ;;"gccmakedep"
-    ;;;;"gcc-bootstrap" ;; add confliting module for gcc 
+    ;;;;"gcc-bootstrap" ;; add confliting module for gcc
     ;;"gcc-objc++"
 
     ;; Remote connection

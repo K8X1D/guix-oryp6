@@ -7,6 +7,7 @@
  '(;;  Emacs
     ;;"emacs-pgtk-native-comp" ;; emacs w wayland support, crash dwl... issue open...
     "emacs-native-comp"
+    ;;"emacs"
     "coreutils"
     "findutils"
 
@@ -39,7 +40,8 @@
 
 
 
-
+;; org
+"emacs-ob-async"
 
 
 
@@ -61,6 +63,7 @@
 "emacs-evil-collection"
 "emacs-evil-surround"
 "emacs-evil-org"
+"emacs-goto-chg"
 "emacs-general"
 "emacs-which-key"
 
