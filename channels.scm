@@ -47,16 +47,6 @@
         "58661b110325fd5d9b40e6f0177cc486a615817e"
         (openpgp-fingerprint
          "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
-(channel
-        (name 'chckyn)
-        (url "https://github.com/chckyn/guix-channel.git")
-        (branch "main")
-        (introduction
-         (make-channel-introduction
-          "1b907bb7105937e2ed5e298b782e8ef4c979905f"
-          (openpgp-fingerprint
-           "2116 4C25 323C EAF7 611E  49E6 9CFB 4F28 C311 D53D"))))
-
 ;;(channel
 ;;  (name 'engstrand-config)
 ;;  (url "https://github.com/engstrand-config/guix-dotfiles")
