@@ -3,9 +3,9 @@
  (fixpkgs
  '(
 
-    ;; 
+    ;;
     ;; programming-support
-    ;; 
+    ;;
     ;; R
     "r-minimal"
     "r-remotes"
@@ -15,6 +15,7 @@
     "r-tidyr"
     "r-devtools"
     "r-curl"
+    "r-pdftools"
     "zlib"
     "mariadb-connector-c"
     "libxml2"

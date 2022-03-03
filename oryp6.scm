@@ -80,7 +80,7 @@
 
 ;; doesm't work since nvidia is loaded at boot-time
 ;; left as example
-;;(define nvidia-config 
+;;(define nvidia-config
 ;;  (plain-file "nvidia.conf"
 ;;              "options nvidia NVreg_DynamicPowerManagement=0x02"))
 
@@ -280,17 +280,20 @@
     ;; does this actually have to be global? i don't know. i do it anyway.
     nvidia-libs-minimal
 
+    ;; buiding tools
+    ;;gcc-toolchain gfortran-toolchain clang-toolchain glibc
+
     ;; are these even needed? i don't remember.
     xf86-input-libinput
     libinput
     ;; fonts
     font-dejavu
     font-juliamono
-    ;; dwm set-up 
+    ;; dwm set-up
     k8x1d-dwm k8x1d-st dmenu
-    ;; strumpwm set-up 
+    ;; strumpwm set-up
     sbcl stumpwm
-    ;; guile-wm set-up 
+    ;; guile-wm set-up
     guile-wm
     ;; databases
     ;;i3-gaps i3lock i3status ;; window manager
@@ -336,7 +339,7 @@
    (screen-locker-service i3lock) ;; necessary to unlock i3lock screen
    ;; pm management
    (service tlp-service-type
-            (tlp-configuration 
+            (tlp-configuration
               (cpu-scaling-governor-on-ac (list "powersave")) ;; not diff alon on temp
               (energy-perf-policy-on-ac "powersave") ;; not diff alon on temp
               (sched-powersave-on-ac? #t) ;; not diff alon on temp
@@ -352,7 +355,7 @@
             ))
 
    ;;(service thermald-service-type) ;; cannot be build, to investigate
-   
+
    ;; TODO battery-alert job not working
     ;; mcron
     (simple-service 'my-cron-jobs
@@ -365,8 +368,8 @@
   ;;           '(("PGHOST" . "/var/run/postgresql") ;; for julia libpq
   ;;             ("RSTUDIO_CHROMIUM_ARGUMENTS" . "--disable-seccomp-filter-sandbox") ;; rstudio temp fix for bas qtwebengine
   ;;             ))
-   ;; databases and container 
-   (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root 
+   ;; databases and container
+   (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
    (service postgresql-service-type
             (postgresql-configuration
               (data-directory "/media/Data/pgdata/14")
@@ -376,17 +379,7 @@
                (web-interface? #t)
                (extensions
                  (list cups-filters epson-inkjet-printer-escpr hplip-minimal))))  ;; (service postgresql-role-service-type
-  ;;             (postgresql-role-configuration
-  ;;              (roles
-  ;;               (list (postgresql-role
-  ;;                      (name "k8x1d")
-  ;;                      (permissions '(superuser))
-  ;;                      (create-database? #t))))))
-   ;; TODO Clean destop services through my-desktop-service
-   ;; (remove (lambda (service)
-   ;;             (eq? (service-kind service) gdm-service-type))
-   ;;         %my-desktop-services)))
-
             %my-desktop-services))
+
  ;; Allow resolution of '.local' host names with mDNS
     (name-service-switch %mdns-host-lookup-nss))

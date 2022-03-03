@@ -47,6 +47,16 @@
         "58661b110325fd5d9b40e6f0177cc486a615817e"
         (openpgp-fingerprint
          "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
+
+;;(channel
+;;        (name 'paren)
+;;        (url "https://codeberg.org/unmatched-paren/guix-channel.git")
+;;        (branch "origin/root")
+;;        (introduction
+;;         (make-channel-introduction
+;;          "8df545bcf04062bc197fb0d2bfb21edc6b76026f"
+;;          (openpgp-fingerprint
+;;           "0B83 7250 5DAF 9C01 A32C  3E4C DC2B ECE8 3E41 C67A"))))
 ;;(channel
 ;;  (name 'engstrand-config)
 ;;  (url "https://github.com/engstrand-config/guix-dotfiles")

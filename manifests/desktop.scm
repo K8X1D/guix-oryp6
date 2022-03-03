@@ -59,8 +59,8 @@
 
     ;; Compilation support
     "gcc-toolchain"
+    "clang-toolchain"
     "gfortran-toolchain"
-    ;;"glibc-bootstrap"
     "glibc"
     "make"
     "cmake"
