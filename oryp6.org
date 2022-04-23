@@ -176,8 +176,6 @@ Set initial brightness
 
 ** Kernel
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-  ;;(initrd microcode-initrd)
-  ;;(initrd-modules "%base-initrd-modules")
   (kernel linux-lts)
   (kernel-loadable-modules (list nvidia-driver))
   (kernel-arguments (list
@@ -185,6 +183,7 @@ Set initial brightness
                      "nvidia.NVreg_DynamicPowerManagement=0x02"
                      "modprobe.blacklist=nouveau"
                      "nmi_watchdog=0"))
+  (initrd microcode-initrd)
   (firmware (list linux-firmware))
 #+END_SRC
 
@@ -446,6 +445,85 @@ Set initial brightness
 #+END_SRC
 
 
+* Shepherd user services
+
+** Init file 
+- That init file allow to split the services as independant
+- see https://guix.gnu.org/en/blog/2020/gnu-shepherd-user-services/)
+
+#+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.scm :noweb yes
+(use-modules (shepherd service)
+             ((ice-9 ftw) #:select (scandir)))
+
+;; Load all the files in the directory 'init.d' with a suffix '.scm'.
+(for-each
+  (lambda (file)
+    (load (string-append "init.d/" file)))
+  (scandir (string-append (dirname (current-filename)) "/init.d")
+           (lambda (file)
+             (string-suffix? ".scm" file))))
+
+;; Send shepherd into the background
+(action 'shepherd 'daemonize)
+#+END_SRC
 
 
+** Sound with pipewire
+#+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/pipewire.scm :noweb yes
+(define pipewire
+  (make <service>
+    #:provides '(pipewire)
+    #:docstring "Run pipewire in the background"
+    #:start (make-forkexec-constructor
+              '("pipewire"))
+    #:stop (make-kill-destructor)
+    #:respawn? #t))
+(register-services pipewire)
 
+(start-in-the-background '(pipewire))
+#+END_SRC
+
+#+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/pipewire-pulse.scm :noweb yes
+(define pipewire-pulse
+  (make <service>
+    #:provides '(pipewire-pulse)
+    #:require '(pipewire)
+    #:docstring "Run pipewire-pulse in the background"
+    #:start (make-forkexec-constructor
+              '("pipewire-pulse"))
+    #:stop (make-kill-destructor)
+    #:respawn? #t))
+(register-services pipewire-pulse)
+
+(start-in-the-background '(pipewire-pulse))
+#+END_SRC
+
+#+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/wireplumber.scm :noweb yes
+    (define wireplumber
+      (make <service>
+        #:provides '(wireplumber)
+        #:require '(pipewire-pulse)
+        #:docstring "Run wireplumber in the background"
+        #:start (make-forkexec-constructor
+                  '("wireplumber"))
+        #:stop (make-kill-destructor)
+        #:respawn? #t))
+    (register-services wireplumber)
+
+  (start-in-the-background '(wireplumber))
+#+END_SRC
+
+** Compositor
+#+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/picom.scm :noweb yes
+    (define picom
+      (make <service>
+        #:provides '(picom)
+        #:docstring "Run picom in the background"
+        #:start (make-forkexec-constructor
+                  '("picom"))
+        #:stop (make-kill-destructor)
+        #:respawn? #t))
+    (register-services picom)
+
+  (start-in-the-background '(picom))
+#+END_SRC

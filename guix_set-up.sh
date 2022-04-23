@@ -1,4 +1,5 @@
 GUIX_CONFIG_DIR="$HOME/.config/guix" 
+SHEPHERD_CONFIG_DIR="$HOME/.config/shepherd" 
 
 if [ -d $GUIX_CONFIG_DIR ] 
 then
@@ -6,6 +7,15 @@ then
 else
     mkdir $GUIX_CONFIG_DIR
     echo "Directory $GUIX_CONFIG_DIR created." 
+fi
+
+
+if [ -d $SHEPHERD_CONFIG_DIR/init.d ] 
+then
+    echo "Directory $SHEPHERD_CONFIG_DIR/init.d exists." 
+else
+    mkdir -p $SHEPHERD_CONFIG_DIR/init.d
+    echo "Directory $SHEPHERD_CONFIG_DIR/init.d created." 
 fi
 
 
