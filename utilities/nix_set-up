@@ -4,10 +4,6 @@ nix-env -i \
   julia-bin \
   brave \
   zotero \
-  yambar \
-  yarn \
-  nodejs \
-  curl \
   neovim \
   system76-firmware
 

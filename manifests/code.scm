@@ -1,38 +1,31 @@
-(load "../gtransform.scm")
-(packages->manifest
- (fixpkgs
+(specifications->manifest
  '(
+   ;; Julia
+   ;;"julia" ;; main package
+   ;;"p7zip" ;; necessary to install package via native package manager
 
-    ;;
-    ;; programming-support
-    ;;
-    ;; R
-    "r-minimal"
-    "r-remotes"
-    "r-learnr"
-    "r-rmarkdown"
-    "r-dplyr"
-    "r-tidyr"
-    "r-devtools"
-    "r-curl"
-    "r-pdftools"
-    "zlib"
-    "mariadb-connector-c"
-    "libxml2"
-    "curl"
-    ;;"libgit2"
-    ;;"libgit2-glib"
 
-    ;; julia
-    "libpqxx" ;; postgresql
-    ;; python
-    "python"
-    ;; rust
-    "rust"
-    "rust-cargo"
-    ;; others
-    ;;"postgresql"
-    "docker-compose"
-    ;; texlive
-    "texlive"
-)))
+
+   "openssh" ;; ssh
+
+   "docker-compose" ;; docker support
+
+
+   ;; R
+   "r" ;; main package
+   "r-ggplot2"
+   "r-dplyr"
+   "r-data-table"
+
+   "r-xml2"
+   "r-openssl"
+   "r-testthat"
+   "r-stringi"
+   "r-igraph"
+   "r-gmp"
+
+   "gfortran-toolchain"
+   "gmp"
+
+
+    ))

@@ -1,0 +1,451 @@
+#+TITLE: K8x1d Oryp6: configuration file(s)
+#+AUTHOR: Kevin Kaiser
+#+EMAIL: k8x1d@protonmail.ch
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+PROPERTY: header-args
+#+STARTUP: showall
+
+* TODOs list
+- [ ] transfer whole config per section
+- [ ] split config per section
+- [ ] add comments
+- [ ] ...
+
+
+
+
+* Description of the system
+
+Machines tested on:
+- System76 oryx pro (oryp6)
+
+** Modules in use
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (use-modules (gnu)
+               (nongnu packages linux)
+               (nongnu system linux-initrd)
+               (nongnu packages nvidia)
+               (gnu system nss)
+               (gnu services xorg)
+               (srfi srfi-1))
+#+END_SRC
+
+** Services modules
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (use-service-modules
+   desktop
+   linux
+   nix
+   file-sharing
+   sddm
+   xorg
+   docker
+   databases
+   pm)
+#+END_SRC
+
+** Packages modules
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (use-package-modules
+   bootloaders
+   certs
+   emacs
+   emacs-xyz
+   gnome
+   suckless
+   linux
+   docker
+   databases
+   package-management ;; for nix
+   wm
+   xorg)
+#+END_SRC
+
+
+* Custom configurations
+
+** Reverse prime configuration
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (define nvidia-dgpu.conf
+    "
+    Section \"ServerLayout\"
+          Identifier \"layout\"
+          Screen 0 \"iGPU\"
+          Inactive \"dGPU\"
+          Option \"AllowNVIDIAGPUScreens\"
+    EndSection
+
+    Section \"Device\"
+       Identifier \"iGPU\"
+       Driver \"modesetting\"
+       BusID \"PCI:0:2:0\"
+     EndSection
+
+     Section \"Screen\"
+       Identifier \"iGPU\"
+       Device \"iGPU\"
+     EndSection
+
+     Section \"Device\"
+       Identifier \"dGPU\"
+       Driver \"nvidia\"
+       BusID \"PCI:1:0:0\"
+     EndSection
+     "
+    )
+#+END_SRC
+
+** Xorg configuration
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (define my-xorg-config
+    (xorg-configuration
+     (modules
+      (cons*
+       nvidia-driver
+       %default-xorg-modules))
+     (extra-config (list nvidia-dgpu.conf))
+     (drivers '("modesetting" "nvidia"))))
+#+END_SRC
+
+** Udev rules
+Allow members of the "video" group to change the screen brightness.
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (define %backlight-udev-rule
+    (udev-rule
+     "90-backlight.rules"
+     (string-append "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
+                    "RUN+=\"/run/current-system/profile/bin/chgrp video /sys/class/backlight/%k/brightness\""
+                    "\n"
+                    "ACTION==\"add\", SUBSYSTEM==\"backlight\", "
+                    "RUN+=\"/run/current-system/profile/bin/chmod g+w /sys/class/backlight/%k/brightness\"")))
+#+END_SRC
+
+Set initial brightness
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (define %initial-backlight-udev-rule
+    (udev-rule
+     "81-backlight.rules"
+     (string-append "SUBSYSTEM==\"backlight\", ACTION==\"add\", KERNEL==\"acpi_video0\", ATTR{brightness}=\"1\"")))
+#+END_SRC
+
+
+** Desktop services
+- add udev rules
+- Access nonguix subtitute
+- delete gdm since sddm is used
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (define %my-desktop-services
+    (modify-services %desktop-services
+                     (udev-service-type config =>
+                                        (udev-configuration (inherit config)
+                                                            (rules (cons* %backlight-udev-rule
+                                                                          %initial-backlight-udev-rule
+                                                                          (udev-configuration-rules config)))))
+                     (guix-service-type config =>
+                                        (guix-configuration (inherit config)
+                                                            (substitute-urls
+                                                             (append (list "https://substitutes.nonguix.org")
+                                                                     %default-substitute-urls))
+                                                            (authorized-keys
+                                                             (append (list (plain-file "non-guix.pub"
+                                                                                       "(public-key (ecc (curve Ed25519)
+                                                                                          (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
+                                                                     %default-authorized-guix-keys))))
+                     (delete gdm-service-type)))
+#+END_SRC
+
+
+
+* Operating system
+
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+    (operating-system
+#+END_SRC
+
+
+** System configuration
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (host-name "oryp6")
+  (timezone "America/Edmonton")
+  (locale "en_US.utf8")
+  (keyboard-layout (keyboard-layout "ca" "fr"
+                                    #:options '("ctrl:nocaps" "altwin:menu_win")))
+#+END_SRC
+
+** Kernel
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ;;(initrd microcode-initrd)
+  ;;(initrd-modules "%base-initrd-modules")
+  (kernel linux-lts)
+  (kernel-loadable-modules (list nvidia-driver))
+  (kernel-arguments (list
+                     "nvidia-drm.modeset=1"
+                     "nvidia.NVreg_DynamicPowerManagement=0x02"
+                     "modprobe.blacklist=nouveau"
+                     "nmi_watchdog=0"))
+  (firmware (list linux-firmware))
+#+END_SRC
+
+** Bootloader
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ;; Use the UEFI variant of GRUB with the EFI System
+  ;; Partition mounted on /boot/efi.
+  (bootloader (bootloader-configuration
+               (bootloader grub-efi-bootloader)
+               (targets '("/boot/efi"))
+               (keyboard-layout keyboard-layout)
+               ;;(menu-entry
+               ;; (label "Arch")
+               ;; (linux "/boot/old/vmlinux-2.6.32")
+               ;; (linux-arguments '("root=/dev/nvme0n1p3"))
+               ;; (initrd "/boot/old/initrd"))
+               ))
+#+END_SRC
+
+
+** Filesystem
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ;; Assume the target root file system is labelled "my-root",
+  ;; and the EFI System Partition has UUID 1234-ABCD.
+  (file-systems (append
+                 (list (file-system
+                        (device (uuid "951e7b1c-d128-43b2-8a59-fbea0168a57c" 'ext4))
+                        (mount-point "/")
+                        (type "ext4"))
+                       (file-system
+                        (device (uuid "e45224c0-20bd-4ba8-880d-2bb84827dce7" 'ext4))
+                        (mount-point "/home")
+                        (type "ext4"))
+                       (file-system
+                        (device (uuid "7eb6c440-b26d-48d9-b8e9-bce47a46dfa1" 'ext4))
+                        (mount-point "/shared")
+                        (type "ext4"))
+                       (file-system
+                        (device (uuid "0554-6F13" 'fat))
+                        (mount-point "/boot/efi")
+                        (type "vfat")))
+                 %base-file-systems))
+#+END_SRC
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (swap-devices (list
+                 (swap-space
+                  (target
+                   (uuid "53b032e7-277c-4c54-9dfe-6c8d50a49ba6"))))) ;; test
+#+END_SRC
+
+
+** User(s)
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (users (cons (user-account
+                (name "k8x1d")
+                (comment "Kevin Kaiser")
+                (group "users")
+                (supplementary-groups '("wheel" "netdev"
+                                        "audio" "video"
+                                        "lp" "docker")))
+               %base-user-accounts))
+#+END_SRC
+
+
+
+** System-wide packages
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (packages (append (list
+                     ;; window managers
+                     emacs emacs-exwm emacs-desktop-environment
+                     nix
+                     ;; Drivers
+                     nvidia-driver
+                     nvidia-libs
+                     ;; for HTTPS access
+                     nss-certs)
+                    %base-packages))
+#+END_SRC
+
+** Services specifications
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+      ;; Use the "desktop" services, which include the X11
+      ;; log-in service, networking with NetworkManager, and more.
+      (services (cons*
+#+END_SRC
+
+*** Nvidia 
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
+  (service kernel-module-loader-service-type
+           '("nvidia"
+             "nvidia_modeset"))
+#+END_SRC
+
+*** Databases
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
+  (service postgresql-service-type
+           (postgresql-configuration
+            (postgresql postgresql-14)))
+  (service postgresql-role-service-type
+           (postgresql-role-configuration
+            (roles
+             (list (postgresql-role
+                    (name "k8x1d")
+                    (permissions '(createdb login superuser))
+                    (create-database? #t))))))
+#+END_SRC
+
+
+*** Power management
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (service tlp-service-type
+           (tlp-configuration
+            (cpu-scaling-governor-on-ac (list "powersave")) ;; not diff alon on temp
+            (energy-perf-policy-on-ac "powersave") ;; not diff alon on temp
+            (sched-powersave-on-ac? #t) ;; not diff alon on temp
+            (max-lost-work-secs-on-ac 60) ;; not diff alon on temp
+            (disk-idle-secs-on-ac 2)
+            (cpu-min-perf-on-bat 0)
+            (cpu-max-perf-on-bat 30)
+            (cpu-min-perf-on-ac 0)
+            (cpu-max-perf-on-ac 100)
+            ;;(cpu-boost-on-ac? enabled)
+            (pcie-aspm-on-ac "powersave")
+            (start-charge-thresh-bat0 85)
+            (stop-charge-thresh-bat0 90)
+            (runtime-pm-on-ac "auto")))
+  (service thermald-service-type)
+#+END_SRC
+
+*** File-sharing
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ;; Torrents
+  (service transmission-daemon-service-type
+           (transmission-daemon-configuration
+            ;; Restrict access to the RPC ("control") interface
+            (download-dir "/shared/torrents")
+            ;;(rpc-authentication-required? #t)
+            ;;(rpc-username "transmission")
+            ;;(rpc-password
+            ;; (transmission-password-hash
+            ;;  "transmission" ; desired password
+            ;;  "uKd1uMs9"))   ; arbitrary salt value
+
+            ;; Accept requests from this and other hosts on the
+            ;; local network
+            ;;(rpc-whitelist-enabled? #t)
+            ;;(rpc-whitelist '("::1" "127.0.0.1" "192.168.0.*"))
+
+            ;; Limit bandwidth use during work hours
+            (alt-speed-down (* 1024 2)) ;   2 MB/s
+            (alt-speed-up 512)))          ; 512 kB/s
+#+END_SRC
+                                   
+*** System commodities
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (bluetooth-service #:auto-enable? #f)
+  (service nix-service-type)
+#+END_SRC
+
+*** Login Managers
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (service sddm-service-type
+           (sddm-configuration
+            (themes-directory "/shared/Projects/Logiciels/sddm/themes")
+            (theme "sugar-dark")
+            ;;(sddm (fixpkg sddm)) ;; seem to cause black screen
+            ;;(xdisplay-start "/home/k8x1d/start-up")
+            ;;(xsession-command picom)
+            (xorg-configuration my-xorg-config)))
+#+END_SRC
+
+*** Desktop services
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  %my-desktop-services
+#+END_SRC
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ))
+#+END_SRC
+
+** Others
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ;; Allow resolution of '.local' host names with mDNS.
+  (name-service-switch %mdns-host-lookup-nss)
+#+END_SRC
+
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+    )
+#+END_SRC
+
+
+
+* Channels
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+    (cons *
+#+END_SRC
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+  (channel
+   (name 'guix)
+   (url "https://git.savannah.gnu.org/git/guix.git")
+   (branch "master")
+   ;;(commit
+   ;;  "056935506b8b5550ebeb3acfc1d0c3b4f11b6a2e")
+   (introduction
+    (make-channel-introduction
+     "9edb3f66fd807b096b48283debdcddccfea34bad"
+     (openpgp-fingerprint
+      "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+#+END_SRC
+    
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+  (channel
+   (name 'nonguix)
+   (url "https://gitlab.com/nonguix/nonguix")
+   (branch "master")
+   ;;(commit
+   ;;  "8c22d70b02d4cf42f64784296fbd267695cd3e4c") ;; last upd:
+   (introduction
+    (make-channel-introduction
+     "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+     (openpgp-fingerprint
+      "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+#+END_SRC
+    
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+  ;;(channel
+  ;; (name 'k8x1d)
+  ;; (url "https://gitlab.com/oryp6/guix_set-up/guix-channel")
+  ;; (branch "main")
+  ;; (introduction
+  ;;  (make-channel-introduction
+  ;;   "c38ce136a8259407e28c16b58ed542f79af26e5a"
+  ;;   (openpgp-fingerprint
+  ;;    "E109 BDB7 58D9 36A9 F4E5  D749 7769 412E D873 CFB8")))
+  ;; )
+#+END_SRC
+    
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+  (channel
+   (name 'flat)
+   (url "https://github.com/flatwhatson/guix-channel.git")
+   (introduction
+    (make-channel-introduction
+     "33f86a4b48205c0dc19d7c036c85393f0766f806"
+     (openpgp-fingerprint
+      "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
+#+END_SRC
+
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+  %default-channels)
+#+END_SRC
+
+
+
+
+

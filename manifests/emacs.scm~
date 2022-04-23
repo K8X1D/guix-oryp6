@@ -1,7 +1,6 @@
 (specifications->manifest
  '(
    ;;"emacs-native-comp"
-   "emacs"
    "coreutils"
    "findutils"
    "libtool"
@@ -24,7 +23,7 @@
    "emacs-org"
    "emacs-org-superstar"
    "emacs-org-ref"
-   "emacs-org-tree-slide"
+   ;;"emacs-org-tree-slide"
 
    ;; Evil support
    "emacs-evil"

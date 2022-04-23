@@ -1,0 +1,4 @@
+mkdir -p ~/.local/bin
+ln -s ~/.config/guix/utilities/launchx ~/.local/bin
+ln -s ~/.config/guix/utilities/activate-profiles ~/.local/bin
+ln -s ~/.config/guix/utilities/update-profiles ~/.local/bin
