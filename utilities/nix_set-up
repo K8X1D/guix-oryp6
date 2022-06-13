@@ -5,6 +5,11 @@ nix-env -i \
   brave \
   zotero \
   neovim \
+  docker-compose \
+  protonvpn-cli \
+  jre_minimal \
+  jdk \
+  libreoffice \
   system76-firmware
 
 

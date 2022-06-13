@@ -11,15 +11,9 @@
 - [ ] split config per section
 - [ ] add comments
 - [ ] ...
-
-
-
-
 * Description of the system
-
 Machines tested on:
 - System76 oryx pro (oryp6)
-
 ** Modules in use
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (use-modules (gnu)
@@ -27,8 +21,9 @@ Machines tested on:
                (nongnu system linux-initrd)
                (nongnu packages nvidia)
                (gnu system nss)
-               (gnu services xorg)
                (srfi srfi-1))
+  ;;(use-modules (engstrand packages xorg))
+ ;; (use-modules (k8x1d packages xorg))
 #+END_SRC
 
 ** Services modules
@@ -41,6 +36,9 @@ Machines tested on:
    sddm
    xorg
    docker
+   vpn
+   networking
+   audio ;; mpd
    databases
    pm)
 #+END_SRC
@@ -49,22 +47,34 @@ Machines tested on:
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (use-package-modules
    bootloaders
+   bash
    certs
    emacs
    emacs-xyz
+   fonts
    gnome
    suckless
    linux
+   xdisorg ;; bemenu
    docker
    databases
    package-management ;; for nix
+   terminals
+   freedesktop ;; libinput
    wm
+   lisp ;; stumpwm
    xorg)
+#+END_SRC
+
+** Extra config
+Graft for mesa with libglvnd support for nvidia 510.73 
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;; make sure you downloaded this file too
+;;(load "./gtransform.scm")
 #+END_SRC
 
 
 * Custom configurations
-
 ** Reverse prime configuration
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (define nvidia-dgpu.conf
@@ -97,16 +107,57 @@ Machines tested on:
 #+END_SRC
 
 ** Xorg configuration
+- for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-  (define my-xorg-config
+  (define my-xorg-conf
     (xorg-configuration
      (modules
       (cons*
        nvidia-driver
-       %default-xorg-modules))
+       (remove
+        (lambda (pkg)
+          (member pkg
+                  (list
+                   xf86-video-amdgpu
+                   xf86-video-ati
+                   xf86-video-cirrus
+                   xf86-video-intel
+                   xf86-video-mach64
+                   xf86-video-nouveau
+                   xf86-video-nv
+                   xf86-video-sis)))
+        %default-xorg-modules)))
      (extra-config (list nvidia-dgpu.conf))
      (drivers '("modesetting" "nvidia"))))
 #+END_SRC
+
+
+- for nvidia 510.73
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;;(define my-xorg-conf
+;;  (xorg-configuration
+;;   (modules
+;;    (cons*
+;;     (fixpkg nvidia-libs-minimal)
+;;     ;; optional: remove garbage.
+;;     (remove
+;;      (lambda (pkg)
+;;        (member pkg
+;;                (list
+;;                 xf86-video-amdgpu
+;;                 xf86-video-ati
+;;                 xf86-video-cirrus
+;;                 xf86-video-intel
+;;                 xf86-video-mach64
+;;                 xf86-video-nouveau
+;;                 xf86-video-nv
+;;                 xf86-video-sis)))
+;;      %default-xorg-modules)))
+;;   (extra-config (list nvidia-dgpu.conf))
+;;   (server (fixpkg xorg-server))
+;;   (drivers '("modesetting" "nvidia"))))
+#+END_SRC
+
 
 ** Udev rules
 Allow members of the "video" group to change the screen brightness.
@@ -129,7 +180,6 @@ Set initial brightness
      (string-append "SUBSYSTEM==\"backlight\", ACTION==\"add\", KERNEL==\"acpi_video0\", ATTR{brightness}=\"1\"")))
 #+END_SRC
 
-
 ** Desktop services
 - add udev rules
 - Access nonguix subtitute
@@ -150,21 +200,20 @@ Set initial brightness
                                                             (authorized-keys
                                                              (append (list (plain-file "non-guix.pub"
                                                                                        "(public-key (ecc (curve Ed25519)
-                                                                                          (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
+                                                                                              (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
                                                                      %default-authorized-guix-keys))))
+                     (network-manager-service-type config =>
+                                                   (network-manager-configuration (inherit config)
+                                                                                  (vpn-plugins (list network-manager-openvpn
+                                                                                                     network-manager-openconnect
+                                                                                                     ))))
                      (delete gdm-service-type)))
 #+END_SRC
 
-
-
 * Operating system
-
-
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
     (operating-system
 #+END_SRC
-
-
 ** System configuration
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (host-name "oryp6")
@@ -175,6 +224,7 @@ Set initial brightness
 #+END_SRC
 
 ** Kernel
+- for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (kernel linux-lts)
   (kernel-loadable-modules (list nvidia-driver))
@@ -184,9 +234,23 @@ Set initial brightness
                      "modprobe.blacklist=nouveau"
                      "nmi_watchdog=0"))
   (initrd microcode-initrd)
+  (initrd-modules %base-initrd-modules)
   (firmware (list linux-firmware))
 #+END_SRC
 
+- for nvidia 510.73
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;;  (kernel linux)
+;;  (kernel-loadable-modules (list (fixpkg nvidia-module)))
+;;  (kernel-arguments (list
+;;                     "nvidia-drm.modeset=1"
+;;                     "nvidia.NVreg_DynamicPowerManagement=0x02"
+;;                     "modprobe.blacklist=nouveau"
+;;                     "nmi_watchdog=0"))
+;;  (initrd microcode-initrd)
+;;  (initrd-modules %base-initrd-modules)
+;;  (firmware (fixpkgs (list linux-firmware)))
+#+END_SRC
 ** Bootloader
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   ;; Use the UEFI variant of GRUB with the EFI System
@@ -195,14 +259,14 @@ Set initial brightness
                (bootloader grub-efi-bootloader)
                (targets '("/boot/efi"))
                (keyboard-layout keyboard-layout)
-               ;;(menu-entry
-               ;; (label "Arch")
-               ;; (linux "/boot/old/vmlinux-2.6.32")
-               ;; (linux-arguments '("root=/dev/nvme0n1p3"))
-               ;; (initrd "/boot/old/initrd"))
+               (menu-entries (list  
+                (menu-entry
+                 (label "Arch")
+                 (linux "/boot/vmlinuz-linux")
+                 (linux-arguments '("root=/dev/nvme0n1p3"))
+                 (initrd "/boot/initramfs-linux.img"))))
                ))
 #+END_SRC
-
 
 ** Filesystem
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -235,7 +299,6 @@ Set initial brightness
                    (uuid "53b032e7-277c-4c54-9dfe-6c8d50a49ba6"))))) ;; test
 #+END_SRC
 
-
 ** User(s)
 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -249,13 +312,20 @@ Set initial brightness
                %base-user-accounts))
 #+END_SRC
 
-
-
 ** System-wide packages
+- for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (packages (append (list
-                     ;; window managers
+                     ;; EXWM set-up
                      emacs emacs-exwm emacs-desktop-environment
+                     ;; i3 set-up
+                     i3-gaps polybar dmenu i3lock alacritty
+                     ;; sway set-up
+                     sway swayidle waybar bemenu swaylock-effects foot
+                     ;; dwm set-up
+                     libx11 libxft libxinerama
+                     ;;engstrand-dwm engstrand-dsblocks engstrand-st
+                     ;;k8x1d-dwm k8x1d-st
                      nix
                      ;; Drivers
                      nvidia-driver
@@ -265,19 +335,63 @@ Set initial brightness
                     %base-packages))
 #+END_SRC
 
+- for nvidia 510.73
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;;  (packages
+;;   (fixpkgs
+;;    (cons*
+;;     ;; for HTTPS access
+;;     nss-certs
+;;
+;;     ;; does this actually have to be global? i don't know. i do it anyway.
+;;     nvidia-libs-minimal
+;;
+;;     ;; are these even needed? i don't remember.
+;;     xf86-input-libinput
+;;     libinput
+;;
+;;     ;; nix
+;;     nix
+;;
+;;     ;; EXWM set-up
+;;     emacs emacs-exwm emacs-desktop-environment
+;;     ;; i3 set-up
+;;     i3-gaps polybar dmenu i3lock alacritty
+;;     ;; sway set-up
+;;     sway waybar bemenu swaylock
+;;
+;;     %base-packages)))
+#+END_SRC
+
 ** Services specifications
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
       ;; Use the "desktop" services, which include the X11
       ;; log-in service, networking with NetworkManager, and more.
       (services (cons*
 #+END_SRC
-
 *** Nvidia 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
   (service kernel-module-loader-service-type
            '("nvidia"
              "nvidia_modeset"))
+#+END_SRC
+
+*** Nvidia 510.73 
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;;  (simple-service
+;;   'my-nvidia-udev-rules udev-service-type
+;;   (list (fixpkg nvidia-udev)))
+;;
+;;  (service kernel-module-loader-service-type
+;;           '("nvidia"
+;;             "nvidia_modeset"
+;;             ;; i dont remember why i put this one here.
+;;             ;; i think i stole it from somebody else.
+;;             ;; maybe it's not needed.
+;;             "ipmi_devintf"))
+;;
+
 #+END_SRC
 
 *** Databases
@@ -295,7 +409,30 @@ Set initial brightness
                     (create-database? #t))))))
 #+END_SRC
 
+*** TODO VPN
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ;;(openvpn-client-service)
+#+END_SRC
 
+*** Music
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+ ;; (service mpd-service-type
+ ;;          (mpd-configuration
+ ;;           (outputs
+ ;;            (list (mpd-output
+ ;;                   (name "PipeWire Sound Server")
+ ;;                   (type "pipewire"))
+ ;;                  ))))
+
+  (service mpd-service-type
+           (mpd-configuration
+            (outputs
+             (list (mpd-output
+                    (name "pulse audio")
+                    (type "pulse"))))
+                   (user "k8x1d")))
+          
+#+END_SRC
 *** Power management
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (service tlp-service-type
@@ -347,6 +484,14 @@ Set initial brightness
   (service nix-service-type)
 #+END_SRC
 
+*** Lock screen
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (screen-locker-service slock)
+  (screen-locker-service i3lock)
+  (screen-locker-service swaylock)
+#+END_SRC
+
+
 *** Login Managers
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (service sddm-service-type
@@ -355,8 +500,10 @@ Set initial brightness
             (theme "sugar-dark")
             ;;(sddm (fixpkg sddm)) ;; seem to cause black screen
             ;;(xdisplay-start "/home/k8x1d/start-up")
+            ;;(xsession-command "/shared/Projects/Logiciels/.xinitrc") ;; test
             ;;(xsession-command picom)
-            (xorg-configuration my-xorg-config)))
+            (sessions-directory "/shared/Projects/Logiciels/sddm/wayland-sessions")
+            (xorg-configuration my-xorg-conf)))
 #+END_SRC
 
 *** Desktop services
@@ -379,12 +526,10 @@ Set initial brightness
     )
 #+END_SRC
 
-
-
 * Channels
 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-    (cons *
+    (list
 #+END_SRC
 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
@@ -416,16 +561,16 @@ Set initial brightness
 #+END_SRC
     
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-  ;;(channel
-  ;; (name 'k8x1d)
-  ;; (url "https://gitlab.com/oryp6/guix_set-up/guix-channel")
-  ;; (branch "main")
-  ;; (introduction
-  ;;  (make-channel-introduction
-  ;;   "c38ce136a8259407e28c16b58ed542f79af26e5a"
-  ;;   (openpgp-fingerprint
-  ;;    "E109 BDB7 58D9 36A9 F4E5  D749 7769 412E D873 CFB8")))
-  ;; )
+  (channel
+   (name 'k8x1d)
+   (url "https://gitlab.com/oryp6/guix_set-up/guix-channel")
+   (branch "main")
+   (introduction
+    (make-channel-introduction
+     "01e404aa740936abc2f11866c23520f218ddc0a3"
+     (openpgp-fingerprint
+      "E109 BDB7 58D9 36A9 F4E5  D749 7769 412E D873 CFB8")))
+   )
 #+END_SRC
     
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
@@ -439,14 +584,31 @@ Set initial brightness
       "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
 #+END_SRC
 
-
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-  %default-channels)
+  (channel
+   (name 'nvidiachannel)
+   (url "https://gitlab.com/squarerectangle/nvidiachannel"))
 #+END_SRC
 
 
-* Shepherd user services
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+ ;;(channel
+ ;; (name 'engstrand-config)
+ ;; (url "https://github.com/engstrand-config/guix-dotfiles")
+ ;; (branch "main")
+ ;; (introduction
+ ;;  (make-channel-introduction
+ ;;   "005c42a980c895e0853b821494534d67c7b85e91"
+ ;;   (openpgp-fingerprint
+ ;;    "C9BE B8A0 4458 FDDF 1268 1B39 029D 8EB7 7E18 D68C"))))
+#+END_SRC
 
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+  )
+#+END_SRC
+
+* Shepherd user services
 ** Init file 
 - That init file allow to split the services as independant
 - see https://guix.gnu.org/en/blog/2020/gnu-shepherd-user-services/)
@@ -466,7 +628,6 @@ Set initial brightness
 ;; Send shepherd into the background
 (action 'shepherd 'daemonize)
 #+END_SRC
-
 
 ** Sound with pipewire
 #+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/pipewire.scm :noweb yes
@@ -527,3 +688,19 @@ Set initial brightness
 
   (start-in-the-background '(picom))
 #+END_SRC
+
+** Color temperature adjustment (DON'T WORK)
+#+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/redshift.scm :noweb yes
+;;    (define redshift
+;;      (make <service>
+;;        #:provides '(redshift)
+;;        #:docstring "Run redshift in the background"
+;;        #:start (make-forkexec-constructor
+;;                  '("redshift" "-l" "53.55014:-113.46871" "-t" "6500:3000"))
+;;        #:stop (make-kill-destructor)
+;;        #:respawn? #t))
+;;    (register-services redshift)
+;;
+;;  (start-in-the-background '(redshift))
+#+END_SRC
+
