@@ -6,11 +6,6 @@
 #+PROPERTY: header-args
 #+STARTUP: showall
 
-* TODOs list
-- [ ] transfer whole config per section
-- [ ] split config per section
-- [ ] add comments
-- [ ] ...
 * Description of the system
 Machines tested on:
 - System76 oryx pro (oryp6)
@@ -25,7 +20,6 @@ Machines tested on:
   ;;(use-modules (engstrand packages xorg))
  ;; (use-modules (k8x1d packages xorg))
 #+END_SRC
-
 ** Services modules
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (use-service-modules
@@ -38,6 +32,7 @@ Machines tested on:
    docker
    vpn
    networking
+   cups
    audio ;; mpd
    databases
    pm)
@@ -72,7 +67,6 @@ Graft for mesa with libglvnd support for nvidia 510.73
 ;; make sure you downloaded this file too
 ;;(load "./gtransform.scm")
 #+END_SRC
-
 
 * Custom configurations
 ** Reverse prime configuration
@@ -131,6 +125,31 @@ Graft for mesa with libglvnd support for nvidia 510.73
      (drivers '("modesetting" "nvidia"))))
 #+END_SRC
 
+- for nvidia open-gpu
+Dynamicpowermanagement don't work...
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;;  (define my-xorg-conf
+;;    (xorg-configuration
+;;     (modules
+;;      (cons*
+;;       nvidia-module
+;;       (remove
+;;        (lambda (pkg)
+;;          (member pkg
+;;                  (list
+;;                   xf86-video-amdgpu
+;;                   xf86-video-ati
+;;                   xf86-video-cirrus
+;;                   xf86-video-intel
+;;                   xf86-video-mach64
+;;                   xf86-video-nouveau
+;;                   xf86-video-nv
+;;                   xf86-video-sis)))
+;;        %default-xorg-modules)))
+;;     (extra-config (list nvidia-dgpu.conf))
+;;     (drivers '("modesetting" "nvidia"))))
+#+END_SRC
+
 
 - for nvidia 510.73
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -158,7 +177,6 @@ Graft for mesa with libglvnd support for nvidia 510.73
 ;;   (drivers '("modesetting" "nvidia"))))
 #+END_SRC
 
-
 ** Udev rules
 Allow members of the "video" group to change the screen brightness.
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -185,29 +203,38 @@ Set initial brightness
 - Access nonguix subtitute
 - delete gdm since sddm is used
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-  (define %my-desktop-services
-    (modify-services %desktop-services
-                     (udev-service-type config =>
-                                        (udev-configuration (inherit config)
-                                                            (rules (cons* %backlight-udev-rule
-                                                                          %initial-backlight-udev-rule
-                                                                          (udev-configuration-rules config)))))
-                     (guix-service-type config =>
-                                        (guix-configuration (inherit config)
-                                                            (substitute-urls
-                                                             (append (list "https://substitutes.nonguix.org")
-                                                                     %default-substitute-urls))
-                                                            (authorized-keys
-                                                             (append (list (plain-file "non-guix.pub"
-                                                                                       "(public-key (ecc (curve Ed25519)
-                                                                                              (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
-                                                                     %default-authorized-guix-keys))))
-                     (network-manager-service-type config =>
-                                                   (network-manager-configuration (inherit config)
-                                                                                  (vpn-plugins (list network-manager-openvpn
-                                                                                                     network-manager-openconnect
-                                                                                                     ))))
-                     (delete gdm-service-type)))
+    (define %my-desktop-services
+      (modify-services %desktop-services
+                       (udev-service-type config =>
+                                          (udev-configuration (inherit config)
+                                                              (rules (cons* %backlight-udev-rule
+                                                                            %initial-backlight-udev-rule
+                                                                            (udev-configuration-rules config)))))
+                       (guix-service-type config =>
+                                          (guix-configuration (inherit config)
+                                                              (substitute-urls
+                                                               (append (list "https://substitutes.nonguix.org")
+                                                                       %default-substitute-urls))
+                                                              (authorized-keys
+                                                               (append (list (plain-file "non-guix.pub"
+                                                                                         "(public-key (ecc (curve Ed25519)
+                                                                                                (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
+                                                                       %default-authorized-guix-keys))))
+                       (network-manager-service-type config =>
+                                                     (network-manager-configuration (inherit config)
+                                                                                    (vpn-plugins (list network-manager-openvpn
+                                                                                                       network-manager-openconnect
+                                                                                                       ))))
+                       (delete gdm-service-type)
+  ))
+
+  ;;  (define %my-docker-service-type
+  ;;    (modify-services docker-service-type
+  ;;                     (docker-service-type config =>
+  ;;                                        (udev-configuration (inherit config)
+  ;;                                                            (rules (cons* %backlight-udev-rule
+  ;;                                                                          %initial-backlight-udev-rule
+  
 #+END_SRC
 
 * Operating system
@@ -217,7 +244,8 @@ Set initial brightness
 ** System configuration
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (host-name "oryp6")
-  (timezone "America/Edmonton")
+  ;;(timezone "America/Edmonton")
+  (timezone "America/New_York")
   (locale "en_US.utf8")
   (keyboard-layout (keyboard-layout "ca" "fr"
                                     #:options '("ctrl:nocaps" "altwin:menu_win")))
@@ -236,6 +264,20 @@ Set initial brightness
   (initrd microcode-initrd)
   (initrd-modules %base-initrd-modules)
   (firmware (list linux-firmware))
+#+END_SRC
+
+- for nvidia open gpu
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  ;;(kernel linux-lts)
+  ;;(kernel-loadable-modules (list nvidia-module))
+  ;;(kernel-arguments (list
+  ;;                   "nvidia-drm.modeset=1"
+  ;;                   "nvidia.NVreg_DynamicPowerManagement=0x02"
+  ;;                   "modprobe.blacklist=nouveau"
+  ;;                   "nmi_watchdog=0"))
+  ;;(initrd microcode-initrd)
+  ;;(initrd-modules %base-initrd-modules)
+  ;;(firmware (list linux-firmware))
 #+END_SRC
 
 - for nvidia 510.73
@@ -261,7 +303,7 @@ Set initial brightness
                (keyboard-layout keyboard-layout)
                (menu-entries (list  
                 (menu-entry
-                 (label "Arch")
+                 (label "Arch Linux")
                  (linux "/boot/vmlinuz-linux")
                  (linux-arguments '("root=/dev/nvme0n1p3"))
                  (initrd "/boot/initramfs-linux.img"))))
@@ -335,6 +377,30 @@ Set initial brightness
                     %base-packages))
 #+END_SRC
 
+
+- for nvidia open-gpu
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+ ;; (packages (append (list
+ ;;                    ;; EXWM set-up
+ ;;                    emacs emacs-exwm emacs-desktop-environment
+ ;;                    ;; i3 set-up
+ ;;                    i3-gaps polybar dmenu i3lock alacritty
+ ;;                    ;; sway set-up
+ ;;                    sway swayidle waybar bemenu swaylock-effects foot
+ ;;                    ;; dwm set-up
+ ;;                    libx11 libxft libxinerama
+ ;;                    ;;engstrand-dwm engstrand-dsblocks engstrand-st
+ ;;                    ;;k8x1d-dwm k8x1d-st
+ ;;                    nix
+ ;;                    ;; Drivers
+ ;;                    nvidia-module
+ ;;                    nvidia-libs
+ ;;                    ;; for HTTPS access
+ ;;                    nss-certs)
+ ;;                   %base-packages))
+#+END_SRC
+
+
 - for nvidia 510.73
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
 ;;  (packages
@@ -377,6 +443,14 @@ Set initial brightness
              "nvidia_modeset"))
 #+END_SRC
 
+*** Nvidia Open-gpu 
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;;  (simple-service 'custom-udev-rules udev-service-type (list nvidia-module))
+;;  (service kernel-module-loader-service-type
+;;           '("nvidia"
+;;             "nvidia_modeset"))
+#+END_SRC
+
 *** Nvidia 510.73 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
 ;;  (simple-service
@@ -399,6 +473,7 @@ Set initial brightness
   (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
   (service postgresql-service-type
            (postgresql-configuration
+            (data-directory "/shared/Databases/postgresql/data")
             (postgresql postgresql-14)))
   (service postgresql-role-service-type
            (postgresql-role-configuration
@@ -407,6 +482,13 @@ Set initial brightness
                     (name "k8x1d")
                     (permissions '(createdb login superuser))
                     (create-database? #t))))))
+#+END_SRC
+
+*** Printers
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (service cups-service-type
+           (cups-configuration
+            (web-interface? #t)))
 #+END_SRC
 
 *** TODO VPN
@@ -433,6 +515,68 @@ Set initial brightness
                    (user "k8x1d")))
           
 #+END_SRC
+
+*** Dwl-guile
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;; Import the service
+(use-modules (dwl-guile home-service)
+             (dwl-guile patches)) ; import if you want dynamic patches
+
+;; Create and add the dwl-guile home service to your home configuration.
+(service home-dwl-guile-service-type
+         ;; If you wish to configure the home service further, you can pass in
+         ;; a configuration to the service. All options listed below are optional.
+         (home-dwl-guile-configuration
+;;          ;; Use a custom dwl package.
+;;          ;; Often used together with the @code{package-transform?} option.
+;;          ;; Note that the dwl-guile patch requires version v0.2.1 of dwl.
+;;          (package my-custom-dwl)
+;;
+;;          ;; Automatically patch the specified package with the patches listed in `patches' below.
+;;          ;; Set this to false if you have a pre-patched/custom version of dwl-guile.
+;;          (package-transform? #f)
+;;
+;;          ;; List of patches to (dynamically) apply to dwl-guile.
+;;          ;; Note that some patches will have conflicts.
+;;          ;;
+;;          ;; It is generally recommended to create a custom version of dwl-guile
+;;          ;; and convert it into a package. You can then set the custom
+;;          ;; package using the package field above.
+;;          (patches (list (%patch-xwayland)))
+;;
+;;          ;; Environment variables to set for Wayland compatibility with applications.
+;;          ;; By default, native Wayland rendering will be enabled for most applications.
+;;          ;; Native rendering of QT-applications is enabled using the @code{native-qt?}
+;;          ;; option. This is because it requires the qtwayland package to render natively.
+;;          ;;
+;;          ;; Set it to an empty list to skip setting environment variables:
+;;          (environment-variables '())
+;;          ;;
+;;          ;; Or extend the default environment variables:
+;;          (environment-variables
+;;           (append `(("var" . "value")) %base-environment-variables))
+;;
+;;          ;; A list of gexps to be executed after starting dwl-guile.
+;;          ;; This is the equivalent of specifying a script to the '-s' flag of dwl.
+;;          ;; The gexp's will be executed in the same order as in the list.
+;;          (startup-commands
+;;           (list
+;;            #~(system* ...)))
+;;
+;;          ;; If QT-applications should be rendered natively. Enabled by default.
+;;          ;; This will set QT_QPA_PLATFORM="wayland-egl" and install
+;;          ;; the "qtwayland" package to enable support for Wayland.
+          (native-qt? #t)
+;;
+;;          ;; If dwl-guile should auto-start on first login. Enabled by default.
+          (auto-start? #f)
+;;
+;;          ;; Create a custom configuration for dwl.
+          (config
+           (dwl-config ...))))
+#+END_SRC
+
 *** Power management
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (service tlp-service-type
@@ -490,19 +634,22 @@ Set initial brightness
   (screen-locker-service i3lock)
   (screen-locker-service swaylock)
 #+END_SRC
-
+*** GNOME desktop
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+ ;;(service gnome-desktop-service-type)
+ #+END_SRC
 
 *** Login Managers
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (service sddm-service-type
            (sddm-configuration
-            (themes-directory "/shared/Projects/Logiciels/sddm/themes")
+            (themes-directory "/shared/Documents/Logiciels/sddm/themes")
             (theme "sugar-dark")
             ;;(sddm (fixpkg sddm)) ;; seem to cause black screen
             ;;(xdisplay-start "/home/k8x1d/start-up")
             ;;(xsession-command "/shared/Projects/Logiciels/.xinitrc") ;; test
             ;;(xsession-command picom)
-            (sessions-directory "/shared/Projects/Logiciels/sddm/wayland-sessions")
+            (sessions-directory "/shared/Documents/Logiciels/sddm/wayland-sessions")
             (xorg-configuration my-xorg-conf)))
 #+END_SRC
 
@@ -561,16 +708,16 @@ Set initial brightness
 #+END_SRC
     
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-  (channel
-   (name 'k8x1d)
-   (url "https://gitlab.com/oryp6/guix_set-up/guix-channel")
-   (branch "main")
-   (introduction
-    (make-channel-introduction
-     "01e404aa740936abc2f11866c23520f218ddc0a3"
-     (openpgp-fingerprint
-      "E109 BDB7 58D9 36A9 F4E5  D749 7769 412E D873 CFB8")))
-   )
+;;  (channel
+;;   (name 'k8x1d)
+;;   (url "https://gitlab.com/oryp6/guix_set-up/guix-channel")
+;;   (branch "main")
+;;   (introduction
+;;    (make-channel-introduction
+;;     "01e404aa740936abc2f11866c23520f218ddc0a3"
+;;     (openpgp-fingerprint
+;;      "E109 BDB7 58D9 36A9 F4E5  D749 7769 412E D873 CFB8")))
+;;   )
 #+END_SRC
     
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
@@ -585,9 +732,22 @@ Set initial brightness
 #+END_SRC
 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-  (channel
-   (name 'nvidiachannel)
-   (url "https://gitlab.com/squarerectangle/nvidiachannel"))
+(channel
+  (name 'home-service-dwl-guile)
+  (url "https://github.com/engstrand-config/home-service-dwl-guile")
+  (branch "main")
+  (introduction
+    (make-channel-introduction
+      "314453a87634d67e914cfdf51d357638902dd9fe"
+      (openpgp-fingerprint
+        "C9BE B8A0 4458 FDDF 1268 1B39 029D 8EB7 7E18 D68C"))))
+#+END_SRC
+
+
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+ ;; (channel
+ ;;  (name 'nvidiachannel)
+ ;;  (url "https://gitlab.com/squarerectangle/nvidiachannel"))
 #+END_SRC
 
 
