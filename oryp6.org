@@ -19,9 +19,6 @@ Machines tested on:
                (srfi srfi-1))
 #+END_SRC
 
-
-
-
 ** Services modules
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (use-service-modules
@@ -548,10 +545,12 @@ Set initial brightness
 
 * Channels
 
+** Header
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
     (list
 #+END_SRC
 
+** Guix channel
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
   (channel
    (name 'guix)
@@ -566,6 +565,9 @@ Set initial brightness
       "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
 #+END_SRC
     
+
+** Non-Guix channel
+- Give access to non-gnu package such as non-libre Linux kernel and nvidia driver 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
   (channel
    (name 'nonguix)
@@ -580,19 +582,8 @@ Set initial brightness
       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
 #+END_SRC
     
-#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-;;  (channel
-;;   (name 'k8x1d)
-;;   (url "https://gitlab.com/oryp6/guix_set-up/guix-channel")
-;;   (branch "main")
-;;   (introduction
-;;    (make-channel-introduction
-;;     "01e404aa740936abc2f11866c23520f218ddc0a3"
-;;     (openpgp-fingerprint
-;;      "E109 BDB7 58D9 36A9 F4E5  D749 7769 412E D873 CFB8")))
-;;   )
-#+END_SRC
-    
+** Flat channel
+- Give access to (pgtk) native compilation emacs
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
   (channel
    (name 'flat)
@@ -604,6 +595,8 @@ Set initial brightness
       "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
 #+END_SRC
 
+** dwl-guile channel
+- Give access as guile configurable dwl fork
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
 (channel
   (name 'home-service-dwl-guile)
@@ -616,27 +609,21 @@ Set initial brightness
         "C9BE B8A0 4458 FDDF 1268 1B39 029D 8EB7 7E18 D68C"))))
 #+END_SRC
 
-
+** Guix science channel
+- Provides recent versions of scientific software, which cannot be included upstream such as RStudio
+- see 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
- ;; (channel
- ;;  (name 'nvidiachannel)
- ;;  (url "https://gitlab.com/squarerectangle/nvidiachannel"))
+(channel
+  (name 'guix-science)
+  (url "https://github.com/guix-science/guix-science.git")
+  (introduction
+   (make-channel-introduction
+        "b1fe5aaff3ab48e798a4cce02f0212bc91f423dc"
+        (openpgp-fingerprint
+         "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
 #+END_SRC
 
-
-#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
- ;;(channel
- ;; (name 'engstrand-config)
- ;; (url "https://github.com/engstrand-config/guix-dotfiles")
- ;; (branch "main")
- ;; (introduction
- ;;  (make-channel-introduction
- ;;   "005c42a980c895e0853b821494534d67c7b85e91"
- ;;   (openpgp-fingerprint
- ;;    "C9BE B8A0 4458 FDDF 1268 1B39 029D 8EB7 7E18 D68C"))))
-#+END_SRC
-
-
+** Footer
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
   )
 #+END_SRC
