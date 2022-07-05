@@ -611,7 +611,8 @@ Set initial brightness
 
 ** Guix science channel
 - Provides recent versions of scientific software, which cannot be included upstream such as RStudio
-- see 
+- see
+*** Channel
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
 (channel
   (name 'guix-science)
@@ -622,6 +623,11 @@ Set initial brightness
         (openpgp-fingerprint
          "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
 #+END_SRC
+
+*** Substitute
+
+
+
 
 ** Footer
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
