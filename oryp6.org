@@ -17,9 +17,11 @@ Machines tested on:
                (nongnu packages nvidia)
                (gnu system nss)
                (srfi srfi-1))
-  ;;(use-modules (engstrand packages xorg))
- ;; (use-modules (k8x1d packages xorg))
 #+END_SRC
+
+
+
+
 ** Services modules
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (use-service-modules
@@ -108,6 +110,7 @@ Graft for mesa with libglvnd support for nvidia 510.73
      (modules
       (cons*
        nvidia-driver
+;;     nvidia-module
        (remove
         (lambda (pkg)
           (member pkg
@@ -124,32 +127,6 @@ Graft for mesa with libglvnd support for nvidia 510.73
      (extra-config (list nvidia-dgpu.conf))
      (drivers '("modesetting" "nvidia"))))
 #+END_SRC
-
-- for nvidia open-gpu
-Dynamicpowermanagement don't work...
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;;  (define my-xorg-conf
-;;    (xorg-configuration
-;;     (modules
-;;      (cons*
-;;       nvidia-module
-;;       (remove
-;;        (lambda (pkg)
-;;          (member pkg
-;;                  (list
-;;                   xf86-video-amdgpu
-;;                   xf86-video-ati
-;;                   xf86-video-cirrus
-;;                   xf86-video-intel
-;;                   xf86-video-mach64
-;;                   xf86-video-nouveau
-;;                   xf86-video-nv
-;;                   xf86-video-sis)))
-;;        %default-xorg-modules)))
-;;     (extra-config (list nvidia-dgpu.conf))
-;;     (drivers '("modesetting" "nvidia"))))
-#+END_SRC
-
 
 - for nvidia 510.73
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -244,8 +221,8 @@ Set initial brightness
 ** System configuration
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (host-name "oryp6")
-  ;;(timezone "America/Edmonton")
-  (timezone "America/New_York")
+  (timezone "America/Edmonton")
+  ;;(timezone "America/New_York")
   (locale "en_US.utf8")
   (keyboard-layout (keyboard-layout "ca" "fr"
                                     #:options '("ctrl:nocaps" "altwin:menu_win")))
@@ -256,6 +233,7 @@ Set initial brightness
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (kernel linux-lts)
   (kernel-loadable-modules (list nvidia-driver))
+  ;;(kernel-loadable-modules (list nvidia-module))
   (kernel-arguments (list
                      "nvidia-drm.modeset=1"
                      "nvidia.NVreg_DynamicPowerManagement=0x02"
@@ -264,20 +242,6 @@ Set initial brightness
   (initrd microcode-initrd)
   (initrd-modules %base-initrd-modules)
   (firmware (list linux-firmware))
-#+END_SRC
-
-- for nvidia open gpu
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-  ;;(kernel linux-lts)
-  ;;(kernel-loadable-modules (list nvidia-module))
-  ;;(kernel-arguments (list
-  ;;                   "nvidia-drm.modeset=1"
-  ;;                   "nvidia.NVreg_DynamicPowerManagement=0x02"
-  ;;                   "modprobe.blacklist=nouveau"
-  ;;                   "nmi_watchdog=0"))
-  ;;(initrd microcode-initrd)
-  ;;(initrd-modules %base-initrd-modules)
-  ;;(firmware (list linux-firmware))
 #+END_SRC
 
 - for nvidia 510.73
@@ -371,35 +335,12 @@ Set initial brightness
                      nix
                      ;; Drivers
                      nvidia-driver
+ ;;                    nvidia-module
                      nvidia-libs
                      ;; for HTTPS access
                      nss-certs)
                     %base-packages))
 #+END_SRC
-
-
-- for nvidia open-gpu
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
- ;; (packages (append (list
- ;;                    ;; EXWM set-up
- ;;                    emacs emacs-exwm emacs-desktop-environment
- ;;                    ;; i3 set-up
- ;;                    i3-gaps polybar dmenu i3lock alacritty
- ;;                    ;; sway set-up
- ;;                    sway swayidle waybar bemenu swaylock-effects foot
- ;;                    ;; dwm set-up
- ;;                    libx11 libxft libxinerama
- ;;                    ;;engstrand-dwm engstrand-dsblocks engstrand-st
- ;;                    ;;k8x1d-dwm k8x1d-st
- ;;                    nix
- ;;                    ;; Drivers
- ;;                    nvidia-module
- ;;                    nvidia-libs
- ;;                    ;; for HTTPS access
- ;;                    nss-certs)
- ;;                   %base-packages))
-#+END_SRC
-
 
 - for nvidia 510.73
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -438,17 +379,10 @@ Set initial brightness
 *** Nvidia 
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
+;;(simple-service 'custom-udev-rules udev-service-type (list nvidia-module))
   (service kernel-module-loader-service-type
            '("nvidia"
              "nvidia_modeset"))
-#+END_SRC
-
-*** Nvidia Open-gpu 
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;;  (simple-service 'custom-udev-rules udev-service-type (list nvidia-module))
-;;  (service kernel-module-loader-service-type
-;;           '("nvidia"
-;;             "nvidia_modeset"))
 #+END_SRC
 
 *** Nvidia 510.73 
@@ -514,67 +448,6 @@ Set initial brightness
                     (type "pulse"))))
                    (user "k8x1d")))
           
-#+END_SRC
-
-*** Dwl-guile
-
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;; Import the service
-(use-modules (dwl-guile home-service)
-             (dwl-guile patches)) ; import if you want dynamic patches
-
-;; Create and add the dwl-guile home service to your home configuration.
-(service home-dwl-guile-service-type
-         ;; If you wish to configure the home service further, you can pass in
-         ;; a configuration to the service. All options listed below are optional.
-         (home-dwl-guile-configuration
-;;          ;; Use a custom dwl package.
-;;          ;; Often used together with the @code{package-transform?} option.
-;;          ;; Note that the dwl-guile patch requires version v0.2.1 of dwl.
-;;          (package my-custom-dwl)
-;;
-;;          ;; Automatically patch the specified package with the patches listed in `patches' below.
-;;          ;; Set this to false if you have a pre-patched/custom version of dwl-guile.
-;;          (package-transform? #f)
-;;
-;;          ;; List of patches to (dynamically) apply to dwl-guile.
-;;          ;; Note that some patches will have conflicts.
-;;          ;;
-;;          ;; It is generally recommended to create a custom version of dwl-guile
-;;          ;; and convert it into a package. You can then set the custom
-;;          ;; package using the package field above.
-;;          (patches (list (%patch-xwayland)))
-;;
-;;          ;; Environment variables to set for Wayland compatibility with applications.
-;;          ;; By default, native Wayland rendering will be enabled for most applications.
-;;          ;; Native rendering of QT-applications is enabled using the @code{native-qt?}
-;;          ;; option. This is because it requires the qtwayland package to render natively.
-;;          ;;
-;;          ;; Set it to an empty list to skip setting environment variables:
-;;          (environment-variables '())
-;;          ;;
-;;          ;; Or extend the default environment variables:
-;;          (environment-variables
-;;           (append `(("var" . "value")) %base-environment-variables))
-;;
-;;          ;; A list of gexps to be executed after starting dwl-guile.
-;;          ;; This is the equivalent of specifying a script to the '-s' flag of dwl.
-;;          ;; The gexp's will be executed in the same order as in the list.
-;;          (startup-commands
-;;           (list
-;;            #~(system* ...)))
-;;
-;;          ;; If QT-applications should be rendered natively. Enabled by default.
-;;          ;; This will set QT_QPA_PLATFORM="wayland-egl" and install
-;;          ;; the "qtwayland" package to enable support for Wayland.
-          (native-qt? #t)
-;;
-;;          ;; If dwl-guile should auto-start on first login. Enabled by default.
-          (auto-start? #f)
-;;
-;;          ;; Create a custom configuration for dwl.
-          (config
-           (dwl-config ...))))
 #+END_SRC
 
 *** Power management
@@ -849,18 +722,33 @@ Set initial brightness
   (start-in-the-background '(picom))
 #+END_SRC
 
+** Emacs daemon
+#+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/emacsd.scm :noweb yes
+(define emacsd
+  (make <service>
+    #:provides '(emacsd)
+    #:docstring "Emacs daemon"
+    #:start (make-forkexec-constructor
+              '("emacs" "--daemon"))
+    #:stop (make-kill-destructor)
+    #:respawn? #f))
+(register-services emacsd)
+
+(start-in-the-background '(emacsd))
+#+END_SRC
+
 ** Color temperature adjustment (DON'T WORK)
 #+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/redshift.scm :noweb yes
-;;    (define redshift
-;;      (make <service>
-;;        #:provides '(redshift)
-;;        #:docstring "Run redshift in the background"
-;;        #:start (make-forkexec-constructor
-;;                  '("redshift" "-l" "53.55014:-113.46871" "-t" "6500:3000"))
-;;        #:stop (make-kill-destructor)
-;;        #:respawn? #t))
-;;    (register-services redshift)
-;;
-;;  (start-in-the-background '(redshift))
+  (define redshift
+    (make <service>
+      #:provides '(redshift)
+      #:docstring "Run redshift in the background"
+      #:start (make-forkexec-constructor
+               '("redshift" "-l" "53.55014:-113.46871" "-t" "6500:3000"))
+      #:stop (make-kill-destructor)
+      #:respawn? #t))
+  (register-services redshift)
+
+  (start-in-the-background '(redshift))
 #+END_SRC
 
