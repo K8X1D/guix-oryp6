@@ -177,38 +177,65 @@ Set initial brightness
 - Access nonguix subtitute
 - delete gdm since sddm is used
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-    (define %my-desktop-services
-      (modify-services %desktop-services
-                       (udev-service-type config =>
-                                          (udev-configuration (inherit config)
-                                                              (rules (cons* %backlight-udev-rule
-                                                                            %initial-backlight-udev-rule
-                                                                            (udev-configuration-rules config)))))
-                       (guix-service-type config =>
-                                          (guix-configuration (inherit config)
-                                                              (substitute-urls
-                                                               (append (list "https://substitutes.nonguix.org")
-                                                                       %default-substitute-urls))
-                                                              (authorized-keys
-                                                               (append (list (plain-file "non-guix.pub"
-                                                                                         "(public-key (ecc (curve Ed25519)
-                                                                                                (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
-                                                                       %default-authorized-guix-keys))))
-                       (network-manager-service-type config =>
-                                                     (network-manager-configuration (inherit config)
-                                                                                    (vpn-plugins (list network-manager-openvpn
-                                                                                                       network-manager-openconnect
-                                                                                                       ))))
-                       (delete gdm-service-type)
-  ))
-
-  ;;  (define %my-docker-service-type
-  ;;    (modify-services docker-service-type
-  ;;                     (docker-service-type config =>
-  ;;                                        (udev-configuration (inherit config)
-  ;;                                                            (rules (cons* %backlight-udev-rule
-  ;;                                                                          %initial-backlight-udev-rule
-  
+  (define %my-desktop-services
+    (modify-services %desktop-services
+                     (udev-service-type config =>
+                                        (udev-configuration (inherit config)
+                                                            (rules (cons* %backlight-udev-rule
+                                                                          %initial-backlight-udev-rule
+                                                                          (udev-configuration-rules config)))))
+                     ;;(guix-service-type config => (guix-configuration
+                     ;;                              (inherit config)
+                     ;;                              (substitute-urls
+                     ;;                               (append (list "https://substitutes.nonguix.org")
+                     ;;                                       %default-substitute-urls))
+                     ;;                              (authorized-keys
+                     ;;                               (append (list (local-file "./nonguix-signing-key.pub"))
+                     ;;                                       %default-authorized-guix-keys))))
+                     (guix-service-type config => (guix-configuration
+                                                   (inherit config)
+                                                   (substitute-urls
+                                                    (append (list "https://substitutes.nonguix.org"
+                                                                  "https://substitutes.guix.psychnotebook.org")
+                                                            %default-substitute-urls))
+                                                   (authorized-keys
+                                                    (append (list (local-file "./nonguix-signing-key.pub")
+                                                                  (local-file "./science-signing-key.pub"))
+                                                            %default-authorized-guix-keys))))
+                     ;;(guix-service-type config =>
+                     ;;                   (guix-configuration (inherit config)
+                     ;;                                       (substitute-urls
+                     ;;                                        (append (list "https://substitutes.nonguix.org")
+                     ;;                                                %default-substitute-urls))
+                     ;;                                       (authorized-keys
+                     ;;                                        (append (list
+                     ;;                                                 (plain-file "non-guix.pub"
+                     ;;                                                             "(public-key (ecc (curve Ed25519)
+                     ;;                                                                                  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
+                     ;;                                                 %default-authorized-guix-keys)))))
+                     ;;(guix-service-type config =>
+                     ;;                   (guix-configuration (inherit config)
+                     ;;                                       (substitute-urls
+                     ;;                                        ;;; Cause building problem, test without it, probably a problem of syntax, could be with either append url or authorized key
+                     ;; - failed even 
+                     ;;                                        ;;(append (list "https://substitutes.nonguix.org
+                     ;;                                        ;;              "https://substitutes.guix.psychnotebook.org")
+                     ;;                                        (append (list "https://substitutes.nonguix.org")
+                     ;;                                                %default-substitute-urls))
+                     ;;                                       (authorized-keys
+                     ;;                                        (append (list
+                     ;;                                                 (plain-file "non-guix.pub"
+                     ;;                                                             "(public-key (ecc (curve Ed25519)
+                     ;;                                                                                  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
+                     ;;                                                 ;;(plain-file "guix-science.pub"
+                     ;;                                                 ;;            "(public-key (ecc (curve Ed25519)
+                     ;;                                                 ;;                                 (q #D4E1CAFAB105581122B326E89804E3546EF905C0D9B39F161BBD8ABB4B11D14A#)))")
+                     ;;                                                 %default-authorized-guix-keys)))))
+                     (network-manager-service-type config =>
+                                                   (network-manager-configuration (inherit config)
+                                                                                  (vpn-plugins (list network-manager-openvpn
+                                                                                                     network-manager-openconnect))))
+                     (delete gdm-service-type)))
 #+END_SRC
 
 * Operating system
@@ -318,25 +345,26 @@ Set initial brightness
 ** System-wide packages
 - for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-  (packages (append (list
-                     ;; EXWM set-up
-                     emacs emacs-exwm emacs-desktop-environment
-                     ;; i3 set-up
-                     i3-gaps polybar dmenu i3lock alacritty
-                     ;; sway set-up
-                     sway swayidle waybar bemenu swaylock-effects foot
-                     ;; dwm set-up
-                     libx11 libxft libxinerama
-                     ;;engstrand-dwm engstrand-dsblocks engstrand-st
-                     ;;k8x1d-dwm k8x1d-st
-                     nix
-                     ;; Drivers
-                     nvidia-driver
- ;;                    nvidia-module
-                     nvidia-libs
-                     ;; for HTTPS access
-                     nss-certs)
-                    %base-packages))
+   (packages (append (list
+  bash bash-completion
+                      ;; EXWM set-up
+                      emacs emacs-exwm emacs-desktop-environment
+                      ;; i3 set-up
+                      i3-gaps polybar dmenu i3lock alacritty
+                      ;; sway set-up
+                      sway swayidle waybar bemenu swaylock-effects foot
+                      ;; dwm set-up
+                      libx11 libxft libxinerama
+                      ;;engstrand-dwm engstrand-dsblocks engstrand-st
+                      ;;k8x1d-dwm k8x1d-st
+                      nix
+                      ;; Drivers
+                      nvidia-driver
+  ;;                    nvidia-module
+                      nvidia-libs
+                      ;; for HTTPS access
+                      nss-certs)
+                     %base-packages))
 #+END_SRC
 
 - for nvidia 510.73
@@ -611,8 +639,6 @@ Set initial brightness
 
 ** Guix science channel
 - Provides recent versions of scientific software, which cannot be included upstream such as RStudio
-- see
-*** Channel
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
 (channel
   (name 'guix-science)
@@ -623,11 +649,6 @@ Set initial brightness
         (openpgp-fingerprint
          "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
 #+END_SRC
-
-*** Substitute
-
-
-
 
 ** Footer
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
