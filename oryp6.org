@@ -125,32 +125,6 @@ Graft for mesa with libglvnd support for nvidia 510.73
      (drivers '("modesetting" "nvidia"))))
 #+END_SRC
 
-- for nvidia 510.73
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;;(define my-xorg-conf
-;;  (xorg-configuration
-;;   (modules
-;;    (cons*
-;;     (fixpkg nvidia-libs-minimal)
-;;     ;; optional: remove garbage.
-;;     (remove
-;;      (lambda (pkg)
-;;        (member pkg
-;;                (list
-;;                 xf86-video-amdgpu
-;;                 xf86-video-ati
-;;                 xf86-video-cirrus
-;;                 xf86-video-intel
-;;                 xf86-video-mach64
-;;                 xf86-video-nouveau
-;;                 xf86-video-nv
-;;                 xf86-video-sis)))
-;;      %default-xorg-modules)))
-;;   (extra-config (list nvidia-dgpu.conf))
-;;   (server (fixpkg xorg-server))
-;;   (drivers '("modesetting" "nvidia"))))
-#+END_SRC
-
 ** Udev rules
 Allow members of the "video" group to change the screen brightness.
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -184,14 +158,6 @@ Set initial brightness
                                                             (rules (cons* %backlight-udev-rule
                                                                           %initial-backlight-udev-rule
                                                                           (udev-configuration-rules config)))))
-                     ;;(guix-service-type config => (guix-configuration
-                     ;;                              (inherit config)
-                     ;;                              (substitute-urls
-                     ;;                               (append (list "https://substitutes.nonguix.org")
-                     ;;                                       %default-substitute-urls))
-                     ;;                              (authorized-keys
-                     ;;                               (append (list (local-file "./nonguix-signing-key.pub"))
-                     ;;                                       %default-authorized-guix-keys))))
                      (guix-service-type config => (guix-configuration
                                                    (inherit config)
                                                    (substitute-urls
@@ -202,35 +168,6 @@ Set initial brightness
                                                     (append (list (local-file "./nonguix-signing-key.pub")
                                                                   (local-file "./science-signing-key.pub"))
                                                             %default-authorized-guix-keys))))
-                     ;;(guix-service-type config =>
-                     ;;                   (guix-configuration (inherit config)
-                     ;;                                       (substitute-urls
-                     ;;                                        (append (list "https://substitutes.nonguix.org")
-                     ;;                                                %default-substitute-urls))
-                     ;;                                       (authorized-keys
-                     ;;                                        (append (list
-                     ;;                                                 (plain-file "non-guix.pub"
-                     ;;                                                             "(public-key (ecc (curve Ed25519)
-                     ;;                                                                                  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
-                     ;;                                                 %default-authorized-guix-keys)))))
-                     ;;(guix-service-type config =>
-                     ;;                   (guix-configuration (inherit config)
-                     ;;                                       (substitute-urls
-                     ;;                                        ;;; Cause building problem, test without it, probably a problem of syntax, could be with either append url or authorized key
-                     ;; - failed even 
-                     ;;                                        ;;(append (list "https://substitutes.nonguix.org
-                     ;;                                        ;;              "https://substitutes.guix.psychnotebook.org")
-                     ;;                                        (append (list "https://substitutes.nonguix.org")
-                     ;;                                                %default-substitute-urls))
-                     ;;                                       (authorized-keys
-                     ;;                                        (append (list
-                     ;;                                                 (plain-file "non-guix.pub"
-                     ;;                                                             "(public-key (ecc (curve Ed25519)
-                     ;;                                                                                  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))")
-                     ;;                                                 ;;(plain-file "guix-science.pub"
-                     ;;                                                 ;;            "(public-key (ecc (curve Ed25519)
-                     ;;                                                 ;;                                 (q #D4E1CAFAB105581122B326E89804E3546EF905C0D9B39F161BBD8ABB4B11D14A#)))")
-                     ;;                                                 %default-authorized-guix-keys)))))
                      (network-manager-service-type config =>
                                                    (network-manager-configuration (inherit config)
                                                                                   (vpn-plugins (list network-manager-openvpn
@@ -268,19 +205,6 @@ Set initial brightness
   (firmware (list linux-firmware))
 #+END_SRC
 
-- for nvidia 510.73
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;;  (kernel linux)
-;;  (kernel-loadable-modules (list (fixpkg nvidia-module)))
-;;  (kernel-arguments (list
-;;                     "nvidia-drm.modeset=1"
-;;                     "nvidia.NVreg_DynamicPowerManagement=0x02"
-;;                     "modprobe.blacklist=nouveau"
-;;                     "nmi_watchdog=0"))
-;;  (initrd microcode-initrd)
-;;  (initrd-modules %base-initrd-modules)
-;;  (firmware (fixpkgs (list linux-firmware)))
-#+END_SRC
 ** Bootloader
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   ;; Use the UEFI variant of GRUB with the EFI System
@@ -367,34 +291,6 @@ Set initial brightness
                      %base-packages))
 #+END_SRC
 
-- for nvidia 510.73
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;;  (packages
-;;   (fixpkgs
-;;    (cons*
-;;     ;; for HTTPS access
-;;     nss-certs
-;;
-;;     ;; does this actually have to be global? i don't know. i do it anyway.
-;;     nvidia-libs-minimal
-;;
-;;     ;; are these even needed? i don't remember.
-;;     xf86-input-libinput
-;;     libinput
-;;
-;;     ;; nix
-;;     nix
-;;
-;;     ;; EXWM set-up
-;;     emacs emacs-exwm emacs-desktop-environment
-;;     ;; i3 set-up
-;;     i3-gaps polybar dmenu i3lock alacritty
-;;     ;; sway set-up
-;;     sway waybar bemenu swaylock
-;;
-;;     %base-packages)))
-#+END_SRC
-
 ** Services specifications
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
       ;; Use the "desktop" services, which include the X11
@@ -408,23 +304,6 @@ Set initial brightness
   (service kernel-module-loader-service-type
            '("nvidia"
              "nvidia_modeset"))
-#+END_SRC
-
-*** Nvidia 510.73 
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;;  (simple-service
-;;   'my-nvidia-udev-rules udev-service-type
-;;   (list (fixpkg nvidia-udev)))
-;;
-;;  (service kernel-module-loader-service-type
-;;           '("nvidia"
-;;             "nvidia_modeset"
-;;             ;; i dont remember why i put this one here.
-;;             ;; i think i stole it from somebody else.
-;;             ;; maybe it's not needed.
-;;             "ipmi_devintf"))
-;;
-
 #+END_SRC
 
 *** Databases
@@ -450,7 +329,7 @@ Set initial brightness
             (web-interface? #t)))
 #+END_SRC
 
-*** TODO VPN
+*** VPN
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   ;;(openvpn-client-service)
 #+END_SRC
@@ -503,18 +382,6 @@ Set initial brightness
            (transmission-daemon-configuration
             ;; Restrict access to the RPC ("control") interface
             (download-dir "/shared/torrents")
-            ;;(rpc-authentication-required? #t)
-            ;;(rpc-username "transmission")
-            ;;(rpc-password
-            ;; (transmission-password-hash
-            ;;  "transmission" ; desired password
-            ;;  "uKd1uMs9"))   ; arbitrary salt value
-
-            ;; Accept requests from this and other hosts on the
-            ;; local network
-            ;;(rpc-whitelist-enabled? #t)
-            ;;(rpc-whitelist '("::1" "127.0.0.1" "192.168.0.*"))
-
             ;; Limit bandwidth use during work hours
             (alt-speed-down (* 1024 2)) ;   2 MB/s
             (alt-speed-up 512)))          ; 512 kB/s
