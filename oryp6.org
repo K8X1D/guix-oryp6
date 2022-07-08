@@ -43,8 +43,8 @@ Machines tested on:
    bootloaders
    bash
    certs
-   emacs
-   emacs-xyz
+   ;;emacs
+   ;;emacs-xyz
    fonts
    gnome
    suckless
@@ -61,7 +61,7 @@ Machines tested on:
 #+END_SRC
 
 ** Extra config
-Graft for mesa with libglvnd support for nvidia 510.73 
+Graft for mesa with libglvnd support for nvidia 510.73
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
 ;; make sure you downloaded this file too
 ;;(load "./gtransform.scm")
@@ -104,10 +104,11 @@ Graft for mesa with libglvnd support for nvidia 510.73
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (define my-xorg-conf
     (xorg-configuration
+     ;;(keyboard-layout keyboard-layout)
      (modules
       (cons*
        nvidia-driver
-;;     nvidia-module
+       ;;     nvidia-module
        (remove
         (lambda (pkg)
           (member pkg
@@ -151,28 +152,29 @@ Set initial brightness
 - Access nonguix subtitute
 - delete gdm since sddm is used
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-  (define %my-desktop-services
-    (modify-services %desktop-services
-                     (udev-service-type config =>
-                                        (udev-configuration (inherit config)
-                                                            (rules (cons* %backlight-udev-rule
-                                                                          %initial-backlight-udev-rule
-                                                                          (udev-configuration-rules config)))))
-                     (guix-service-type config => (guix-configuration
-                                                   (inherit config)
-                                                   (substitute-urls
-                                                    (append (list "https://substitutes.nonguix.org"
-                                                                  "https://substitutes.guix.psychnotebook.org")
-                                                            %default-substitute-urls))
-                                                   (authorized-keys
-                                                    (append (list (local-file "./nonguix-signing-key.pub")
-                                                                  (local-file "./science-signing-key.pub"))
-                                                            %default-authorized-guix-keys))))
-                     (network-manager-service-type config =>
-                                                   (network-manager-configuration (inherit config)
-                                                                                  (vpn-plugins (list network-manager-openvpn
-                                                                                                     network-manager-openconnect))))
-                     (delete gdm-service-type)))
+    (define %my-desktop-services
+      (modify-services %desktop-services
+                       (udev-service-type config =>
+                                          (udev-configuration (inherit config)
+                                                              (rules (cons* %backlight-udev-rule
+                                                                            %initial-backlight-udev-rule
+                                                                            (udev-configuration-rules config)))))
+                       (guix-service-type config => (guix-configuration
+                                                     (inherit config)
+                                                     (substitute-urls
+                                                      (append (list "https://substitutes.nonguix.org"
+                                                                    "https://substitutes.guix.psychnotebook.org")
+                                                              %default-substitute-urls))
+                                                     (authorized-keys
+                                                      (append (list (local-file "./nonguix-signing-key.pub")
+                                                                    (local-file "./science-signing-key.pub"))
+                                                              %default-authorized-guix-keys))))
+                       (network-manager-service-type config =>
+                                                     (network-manager-configuration (inherit config)
+                                                                                    (vpn-plugins (list network-manager-openvpn
+                                                                                                       network-manager-openconnect))))
+                       (delete gdm-service-type)
+  ))
 #+END_SRC
 
 * Operating system
@@ -213,7 +215,7 @@ Set initial brightness
                (bootloader grub-efi-bootloader)
                (targets '("/boot/efi"))
                (keyboard-layout keyboard-layout)
-               (menu-entries (list  
+               (menu-entries (list
                 (menu-entry
                  (label "Arch Linux")
                  (linux "/boot/vmlinuz-linux")
@@ -269,26 +271,28 @@ Set initial brightness
 ** System-wide packages
 - for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-   (packages (append (list
-  bash bash-completion
-                      ;; EXWM set-up
-                      emacs emacs-exwm emacs-desktop-environment
-                      ;; i3 set-up
-                      i3-gaps polybar dmenu i3lock alacritty
-                      ;; sway set-up
-                      sway swayidle waybar bemenu swaylock-effects foot
-                      ;; dwm set-up
-                      libx11 libxft libxinerama
-                      ;;engstrand-dwm engstrand-dsblocks engstrand-st
-                      ;;k8x1d-dwm k8x1d-st
-                      nix
-                      ;; Drivers
-                      nvidia-driver
-  ;;                    nvidia-module
-                      nvidia-libs
-                      ;; for HTTPS access
-                      nss-certs)
-                     %base-packages))
+  (packages (append (list
+                     bash bash-completion
+                     ;; EXWM set-up
+                     ;;emacs emacs-exwm emacs-desktop-environment
+                     ;; i3 set-up
+                     i3-gaps polybar dmenu i3lock alacritty
+                     ;; sway set-up
+                     sway swayidle waybar bemenu swaylock-effects foot
+                     ;; dwm set-up
+                     libx11 libxft libxinerama
+                     ;;engstrand-dwm engstrand-dsblocks engstrand-st
+                     ;;k8x1d-dwm k8x1d-st
+                     nix
+                     ;; Drivers
+                     nvidia-driver
+                     ;; nvidia-module
+                     nvidia-libs
+                     ;; For user mounts
+                     gvfs
+                     ;; for HTTPS access
+                     nss-certs)
+                    %base-packages))
 #+END_SRC
 
 ** Services specifications
@@ -297,7 +301,8 @@ Set initial brightness
       ;; log-in service, networking with NetworkManager, and more.
       (services (cons*
 #+END_SRC
-*** Nvidia 
+
+*** Nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
 ;;(simple-service 'custom-udev-rules udev-service-type (list nvidia-module))
@@ -305,7 +310,6 @@ Set initial brightness
            '("nvidia"
              "nvidia_modeset"))
 #+END_SRC
-
 *** Databases
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
@@ -351,7 +355,7 @@ Set initial brightness
                     (name "pulse audio")
                     (type "pulse"))))
                    (user "k8x1d")))
-          
+
 #+END_SRC
 
 *** Power management
@@ -386,7 +390,7 @@ Set initial brightness
             (alt-speed-down (* 1024 2)) ;   2 MB/s
             (alt-speed-up 512)))          ; 512 kB/s
 #+END_SRC
-                                   
+
 *** System commodities
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (bluetooth-service #:auto-enable? #f)
@@ -401,7 +405,7 @@ Set initial brightness
 #+END_SRC
 *** GNOME desktop
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
- ;;(service gnome-desktop-service-type)
+ (service gnome-desktop-service-type)
  #+END_SRC
 
 *** Login Managers
@@ -418,6 +422,12 @@ Set initial brightness
             (xorg-configuration my-xorg-conf)))
 #+END_SRC
 
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+;;  (service gdm-service-type
+;;           (gdm-configuration
+;;            (wayland? #t)
+;;            (xorg-configuration my-xorg-conf)))
+#+END_SRC
 *** Desktop services
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   %my-desktop-services
@@ -439,7 +449,6 @@ Set initial brightness
 #+END_SRC
 
 * Channels
-
 ** Header
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
     (list
@@ -459,10 +468,9 @@ Set initial brightness
      (openpgp-fingerprint
       "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
 #+END_SRC
-    
 
 ** Non-Guix channel
-- Give access to non-gnu package such as non-libre Linux kernel and nvidia driver 
+- Give access to non-gnu package such as non-libre Linux kernel and nvidia driver
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
   (channel
    (name 'nonguix)
@@ -476,7 +484,7 @@ Set initial brightness
      (openpgp-fingerprint
       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
 #+END_SRC
-    
+
 ** Flat channel
 - Give access to (pgtk) native compilation emacs
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
@@ -523,7 +531,7 @@ Set initial brightness
 #+END_SRC
 
 * Shepherd user services
-** Init file 
+** Init file
 - That init file allow to split the services as independant
 - see https://guix.gnu.org/en/blog/2020/gnu-shepherd-user-services/)
 
@@ -590,46 +598,46 @@ Set initial brightness
 
 ** Compositor
 #+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/picom.scm :noweb yes
-    (define picom
-      (make <service>
-        #:provides '(picom)
-        #:docstring "Run picom in the background"
-        #:start (make-forkexec-constructor
-                  '("picom"))
-        #:stop (make-kill-destructor)
-        #:respawn? #t))
-    (register-services picom)
-
-  (start-in-the-background '(picom))
+;;    (define picom
+;;      (make <service>
+;;        #:provides '(picom)
+;;        #:docstring "Run picom in the background"
+;;        #:start (make-forkexec-constructor
+;;                  '("picom"))
+;;        #:stop (make-kill-destructor)
+;;        #:respawn? #t))
+;;    (register-services picom)
+;;
+;;  (start-in-the-background '(picom))
 #+END_SRC
 
 ** Emacs daemon
 #+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/emacsd.scm :noweb yes
-(define emacsd
-  (make <service>
-    #:provides '(emacsd)
-    #:docstring "Emacs daemon"
-    #:start (make-forkexec-constructor
-              '("emacs" "--daemon"))
-    #:stop (make-kill-destructor)
-    #:respawn? #f))
-(register-services emacsd)
-
-(start-in-the-background '(emacsd))
+;;(define emacsd
+;;  (make <service>
+;;    #:provides '(emacsd)
+;;    #:docstring "Emacs daemon"
+;;    #:start (make-forkexec-constructor
+;;              '("emacs" "--daemon"))
+;;    #:stop (make-kill-destructor)
+;;    #:respawn? #f))
+;;(register-services emacsd)
+;;
+;;(start-in-the-background '(emacsd))
 #+END_SRC
 
-** Color temperature adjustment (DON'T WORK)
+** Color temperature adjustment
 #+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/redshift.scm :noweb yes
-  (define redshift
-    (make <service>
-      #:provides '(redshift)
-      #:docstring "Run redshift in the background"
-      #:start (make-forkexec-constructor
-               '("redshift" "-l" "53.55014:-113.46871" "-t" "6500:3000"))
-      #:stop (make-kill-destructor)
-      #:respawn? #t))
-  (register-services redshift)
-
-  (start-in-the-background '(redshift))
+;;  (define redshift
+;;    (make <service>
+;;      #:provides '(redshift)
+;;      #:docstring "Run redshift in the background"
+;;      #:start (make-forkexec-constructor
+;;               '("redshift" "-l" "53.55014:-113.46871" "-t" "6500:3000"))
+;;      #:stop (make-kill-destructor)
+;;      #:respawn? #t))
+;;  (register-services redshift)
+;;
+;;  (start-in-the-background '(redshift))
 #+END_SRC
 
