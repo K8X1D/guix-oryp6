@@ -56,6 +56,7 @@ Machines tested on:
    terminals
    freedesktop ;; libinput
    wm
+   shells ;; zsh
    lisp ;; stumpwm
    xorg)
 #+END_SRC
@@ -262,6 +263,7 @@ Set initial brightness
                 (name "k8x1d")
                 (comment "Kevin Kaiser")
                 (group "users")
+                ;;(shell (file-append zsh "/bin/zsh"))
                 (supplementary-groups '("wheel" "netdev"
                                         "audio" "video"
                                         "lp" "docker")))
@@ -272,7 +274,7 @@ Set initial brightness
 - for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (packages (append (list
-                     bash bash-completion
+                     ;l bash bash-completion
                      ;; EXWM set-up
                      ;;emacs emacs-exwm emacs-desktop-environment
                      ;; i3 set-up
@@ -384,9 +386,7 @@ Set initial brightness
   ;; Torrents
   (service transmission-daemon-service-type
            (transmission-daemon-configuration
-            ;; Restrict access to the RPC ("control") interface
             (download-dir "/shared/torrents")
-            ;; Limit bandwidth use during work hours
             (alt-speed-down (* 1024 2)) ;   2 MB/s
             (alt-speed-up 512)))          ; 512 kB/s
 #+END_SRC

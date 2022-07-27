@@ -5,13 +5,18 @@ nix-env -i \
   brave \
   zotero \
   neovim \
-  docker-compose \
+  discord \
+  caprine \
+  zoom-us \
+  spotify \
+  teams \
   protonvpn-cli \
-  jre_minimal \
-  jdk \
-  libreoffice \
+  android-file-transfer \
   system76-firmware
 
 
 ## wayland wm
 ##sway swaylock swayidle swaybg
+  #jre_minimal \
+  #jdk \
+  #libreoffice \
