@@ -1,19 +1,20 @@
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
-nix-env -i \
-  julia-bin \
-  brave \
-  zotero \
-  neovim \
-  discord \
-  caprine \
-  zoom-us \
-  vscode
-  spotify \
-  teams \
-  protonvpn-cli \
-  android-file-transfer \
-  system76-firmware
+nix-env -iA \
+  nixpkgs.julia-bin \
+  nixpkgs.brave \
+  nixpkgs.zotero \
+  nixpkgs.neovim \
+  nixpkgs.discord \
+  nixpkgs.caprine-bin \
+  nixpkgs.zoom-us \
+  nixpkgs.vscode
+  nixpkgs.spotify \
+  nixpkgs.teams \
+  nixpkgs.slack \
+  nixpkgs.protonvpn-cli \
+  nixpkgs.android-file-transfer \
+  nixpkgs.system76-firmware
 
 
 ## wayland wm
