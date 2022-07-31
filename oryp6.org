@@ -243,6 +243,10 @@ Set initial brightness
                         (mount-point "/shared")
                         (type "ext4"))
                        (file-system
+                        (device (uuid "d3900119-e611-4e5a-887c-cd1dbf3711b4" 'ext4))
+                        (mount-point "/extension")
+                        (type "ext4"))
+                       (file-system
                         (device (uuid "0554-6F13" 'fat))
                         (mount-point "/boot/efi")
                         (type "vfat")))

@@ -5,6 +5,12 @@ nix-env -iA \
   nixpkgs.brave \
   nixpkgs.zotero \
   nixpkgs.neovim \
+  nixpkgs.luajitPackages.luarocks \
+  nixpkgs.cargo \
+  nixpkgs.tree-sitter \
+  nixpkgs.sumneko-lua-language-server \
+  nixpkgs.texlab \
+  nixpkgs.zathura \
   nixpkgs.discord \
   nixpkgs.caprine-bin \
   nixpkgs.zoom-us \
