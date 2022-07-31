@@ -9,6 +9,7 @@ nix-env -iA \
   nixpkgs.cargo \
   nixpkgs.tree-sitter \
   nixpkgs.sumneko-lua-language-server \
+  nixpkgs.nodePackages.bash-language-server \
   nixpkgs.texlab \
   nixpkgs.zathura \
   nixpkgs.discord \
