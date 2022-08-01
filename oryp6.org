@@ -16,6 +16,8 @@ Machines tested on:
                (nongnu system linux-initrd)
                (nongnu packages nvidia)
                (gnu system nss)
+               (k8x1d packages k8x1d-dwm)
+               (k8x1d packages k8x1d-st)
                (srfi srfi-1))
 #+END_SRC
 
@@ -47,7 +49,6 @@ Machines tested on:
    ;;emacs-xyz
    fonts
    gnome
-   suckless
    linux
    xdisorg ;; bemenu
    docker
@@ -56,6 +57,7 @@ Machines tested on:
    terminals
    freedesktop ;; libinput
    wm
+   suckless
    shells ;; zsh
    lisp ;; stumpwm
    xorg)
@@ -286,7 +288,7 @@ Set initial brightness
                      ;; sway set-up
                      sway swayidle waybar bemenu swaylock-effects foot
                      ;; dwm set-up
-                     libx11 libxft libxinerama
+                     k8x1d-dwm k8x1d-st libx11 libxft libxinerama
                      ;;engstrand-dwm engstrand-dsblocks engstrand-st
                      ;;k8x1d-dwm k8x1d-st
                      nix
@@ -514,6 +516,18 @@ Set initial brightness
       "314453a87634d67e914cfdf51d357638902dd9fe"
       (openpgp-fingerprint
         "C9BE B8A0 4458 FDDF 1268 1B39 029D 8EB7 7E18 D68C"))))
+#+END_SRC
+
+** K8X1D channel
+#+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
+(channel
+ (name 'k8x1d)
+ (url "https://gitlab.com/oryp6/guix_set-up/guix-channel.git")
+ (introduction
+  (make-channel-introduction
+   "89cbead6564dbe450c91ea2dc0b102f247c47ede"
+   (openpgp-fingerprint
+    "E109 BDB7 58D9 36A9 F4E5 D749 7769 412E D873 CFB8"))))
 #+END_SRC
 
 ** Guix science channel
