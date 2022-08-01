@@ -416,13 +416,13 @@ Set initial brightness
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (service sddm-service-type
            (sddm-configuration
-            (themes-directory "/shared/Documents/Logiciels/sddm/themes")
+            (themes-directory "/shared/Documents/Logiciels/guix_set-up/sddm/themes")
             (theme "sugar-dark")
             ;;(sddm (fixpkg sddm)) ;; seem to cause black screen
             ;;(xdisplay-start "/home/k8x1d/start-up")
             ;;(xsession-command "/shared/Projects/Logiciels/.xinitrc") ;; test
             ;;(xsession-command picom)
-            (sessions-directory "/shared/Documents/Logiciels/sddm/wayland-sessions")
+            (sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
             (xorg-configuration my-xorg-conf)))
 #+END_SRC
 

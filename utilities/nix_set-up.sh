@@ -10,6 +10,7 @@ nix-env -iA \
   nixpkgs.tree-sitter \
   nixpkgs.sumneko-lua-language-server \
   nixpkgs.nodePackages.bash-language-server \
+  nixpkgs.nodePackages.pyright \
   nixpkgs.texlab \
   nixpkgs.zathura \
   nixpkgs.discord \
