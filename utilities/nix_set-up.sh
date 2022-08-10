@@ -1,22 +1,22 @@
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
 nix-env -iA \
-  nixpkgs.julia-bin \
   nixpkgs.brave \
   nixpkgs.zotero \
+  nixpkgs.discord \
+  nixpkgs.julia-bin \
   nixpkgs.neovim \
   nixpkgs.luajitPackages.luarocks \
   nixpkgs.cargo \
   nixpkgs.tree-sitter \
   nixpkgs.sumneko-lua-language-server \
+  nixpkgs.nodePackages.coc-clangd \
   nixpkgs.nodePackages.bash-language-server \
   nixpkgs.nodePackages.pyright \
   nixpkgs.texlab \
   nixpkgs.zathura \
-  nixpkgs.discord \
-  nixpkgs.caprine-bin \
-  nixpkgs.zoom-us \
-  nixpkgs.vscode
+  nixpkgs.glow \
+  nixpkgs.vscode \
   nixpkgs.spotify \
   nixpkgs.teams \
   nixpkgs.slack \
@@ -30,3 +30,6 @@ nix-env -iA \
   #jre_minimal \
   #jdk \
   #libreoffice \
+
+##
+

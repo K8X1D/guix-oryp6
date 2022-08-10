@@ -16,8 +16,6 @@ Machines tested on:
                (nongnu system linux-initrd)
                (nongnu packages nvidia)
                (gnu system nss)
-               (k8x1d packages k8x1d-dwm)
-               (k8x1d packages k8x1d-st)
                (srfi srfi-1))
 #+END_SRC
 
@@ -45,15 +43,15 @@ Machines tested on:
    bootloaders
    bash
    certs
-   ;;emacs
-   ;;emacs-xyz
+   emacs
+   emacs-xyz
    fonts
-   gnome
    linux
    xdisorg ;; bemenu
    docker
    databases
    package-management ;; for nix
+   gnome
    terminals
    freedesktop ;; libinput
    wm
@@ -102,12 +100,21 @@ Graft for mesa with libglvnd support for nvidia 510.73
     )
 #+END_SRC
 
+
+** Keyboard layout
+#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
+  (define my-keyboard-layout
+    (keyboard-layout "ca" "fr"
+                     #:options '("ctrl:nocaps" "altwin:menu_win")))
+
+#+END_SRC
+
 ** Xorg configuration
 - for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (define my-xorg-conf
     (xorg-configuration
-     ;;(keyboard-layout keyboard-layout)
+     (keyboard-layout my-keyboard-layout)
      (modules
       (cons*
        nvidia-driver
@@ -190,8 +197,7 @@ Set initial brightness
   (timezone "America/Edmonton")
   ;;(timezone "America/New_York")
   (locale "en_US.utf8")
-  (keyboard-layout (keyboard-layout "ca" "fr"
-                                    #:options '("ctrl:nocaps" "altwin:menu_win")))
+  (keyboard-layout my-keyboard-layout)
 #+END_SRC
 
 ** Kernel
@@ -201,9 +207,12 @@ Set initial brightness
   (kernel-loadable-modules (list nvidia-driver))
   ;;(kernel-loadable-modules (list nvidia-module))
   (kernel-arguments (list
+                     ;; Nvidia set-up
                      "nvidia-drm.modeset=1"
                      "nvidia.NVreg_DynamicPowerManagement=0x02"
                      "modprobe.blacklist=nouveau"
+                     ;; Fix audio problem: headphone hissing on right ear; cost: loose microphone for headphone
+                     "snd-hda-intel.model=clevo-p950"
                      "nmi_watchdog=0"))
   (initrd microcode-initrd)
   (initrd-modules %base-initrd-modules)
@@ -217,7 +226,7 @@ Set initial brightness
   (bootloader (bootloader-configuration
                (bootloader grub-efi-bootloader)
                (targets '("/boot/efi"))
-               (keyboard-layout keyboard-layout)
+               (keyboard-layout my-keyboard-layout)
                (menu-entries (list
                 (menu-entry
                  (label "Arch Linux")
@@ -280,15 +289,16 @@ Set initial brightness
 - for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (packages (append (list
-                     ;l bash bash-completion
+                                          ;l bash bash-completion
                      ;; EXWM set-up
-                     ;;emacs emacs-exwm emacs-desktop-environment
+                     emacs-next emacs-exwm emacs-desktop-environment
+                     ;;emacs-next-pgtk
                      ;; i3 set-up
                      i3-gaps polybar dmenu i3lock alacritty
                      ;; sway set-up
                      sway swayidle waybar bemenu swaylock-effects foot
-                     ;; dwm set-up
-                     k8x1d-dwm k8x1d-st libx11 libxft libxinerama
+                     ;;awesome-wm
+                     awesome
                      ;;engstrand-dwm engstrand-dsblocks engstrand-st
                      ;;k8x1d-dwm k8x1d-st
                      nix
@@ -409,10 +419,6 @@ Set initial brightness
   (screen-locker-service i3lock)
   (screen-locker-service swaylock)
 #+END_SRC
-*** GNOME desktop
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
- (service gnome-desktop-service-type)
- #+END_SRC
 
 *** Login Managers
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
@@ -425,6 +431,7 @@ Set initial brightness
             ;;(xsession-command "/shared/Projects/Logiciels/.xinitrc") ;; test
             ;;(xsession-command picom)
             (sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
+            (xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
             (xorg-configuration my-xorg-conf)))
 #+END_SRC
 
@@ -494,40 +501,40 @@ Set initial brightness
 ** Flat channel
 - Give access to (pgtk) native compilation emacs
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-  (channel
-   (name 'flat)
-   (url "https://github.com/flatwhatson/guix-channel.git")
-   (introduction
-    (make-channel-introduction
-     "33f86a4b48205c0dc19d7c036c85393f0766f806"
-     (openpgp-fingerprint
-      "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
+;;  (channel
+;;   (name 'flat)
+;;   (url "https://github.com/flatwhatson/guix-channel.git")
+;;   (introduction
+;;    (make-channel-introduction
+;;     "33f86a4b48205c0dc19d7c036c85393f0766f806"
+;;     (openpgp-fingerprint
+;;      "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
 #+END_SRC
 
 ** dwl-guile channel
 - Give access as guile configurable dwl fork
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-(channel
-  (name 'home-service-dwl-guile)
-  (url "https://github.com/engstrand-config/home-service-dwl-guile")
-  (branch "main")
-  (introduction
-    (make-channel-introduction
-      "314453a87634d67e914cfdf51d357638902dd9fe"
-      (openpgp-fingerprint
-        "C9BE B8A0 4458 FDDF 1268 1B39 029D 8EB7 7E18 D68C"))))
+;;(channel
+;;  (name 'home-service-dwl-guile)
+;;  (url "https://github.com/engstrand-config/home-service-dwl-guile")
+;;  (branch "main")
+;;  (introduction
+;;    (make-channel-introduction
+;;      "314453a87634d67e914cfdf51d357638902dd9fe"
+;;      (openpgp-fingerprint
+;;        "C9BE B8A0 4458 FDDF 1268 1B39 029D 8EB7 7E18 D68C"))))
 #+END_SRC
 
 ** K8X1D channel
 #+BEGIN_SRC scheme :tangle ~/.config/guix/channels.scm :noweb yes
-(channel
- (name 'k8x1d)
- (url "https://gitlab.com/oryp6/guix_set-up/guix-channel.git")
- (introduction
-  (make-channel-introduction
-   "89cbead6564dbe450c91ea2dc0b102f247c47ede"
-   (openpgp-fingerprint
-    "E109 BDB7 58D9 36A9 F4E5 D749 7769 412E D873 CFB8"))))
+;;(channel
+;; (name 'k8x1d)
+;; (url "https://gitlab.com/oryp6/guix_set-up/guix-channel.git")
+;; (introduction
+;;  (make-channel-introduction
+;;   "a3633fe58b4c9cfd6918b9d8abbbc394010a642d"
+;;   (openpgp-fingerprint
+;;    "E109 BDB7 58D9 36A9 F4E5 D749 7769 412E D873 CFB8"))))
 #+END_SRC
 
 ** Guix science channel
