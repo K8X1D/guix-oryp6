@@ -212,7 +212,9 @@ Set initial brightness
                      "nvidia.NVreg_DynamicPowerManagement=0x02"
                      "modprobe.blacklist=nouveau"
                      ;; Fix audio problem: headphone hissing on right ear; cost: loose microphone for headphone
-                     "snd-hda-intel.model=clevo-p950"
+                     "snd_hda_intel.model=clevo-p950"
+                     ;;"snd-hda-intel.power-save=0"
+                     "snd_hda_intel.power_save=0"
                      "nmi_watchdog=0"))
   (initrd microcode-initrd)
   (initrd-modules %base-initrd-modules)
@@ -390,6 +392,7 @@ Set initial brightness
             (cpu-min-perf-on-ac 0)
             (cpu-max-perf-on-ac 100)
             ;;(cpu-boost-on-ac? enabled)
+            (sound-power-save-on-bat 0) ;; don't change kernel parameters
             (pcie-aspm-on-ac "powersave")
             (start-charge-thresh-bat0 85)
             (stop-charge-thresh-bat0 90)
