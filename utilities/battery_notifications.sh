@@ -1,8 +1,7 @@
+#!/home/k8x1d/.guix-extra-profiles/desktop/desktop/bin/bash
 # inspired by https://askubuntu.com/questions/518928/how-to-write-a-script-to-listen-to-battery-status-and-alert-me-when-its-above
-
 warning_level=30
 critic_level=10
-
 while true
 do
    battery_level=`acpi -b | grep -P -o '[0-9]+(?=%)'`
