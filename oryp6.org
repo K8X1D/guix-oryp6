@@ -200,6 +200,7 @@ Set initial brightness
                      ;; Nvidia set-up
                      "nvidia-drm.modeset=1"
                      "nvidia.NVreg_DynamicPowerManagement=0x02"
+                     "nvidia.NVreg_DynamicPowerManagement=0x02"
                      "modprobe.blacklist=nouveau"
                      ;; Fix audio problem: headphone hissing on right ear; cost: loose microphone for headphone
                      "snd_hda_intel.model=clevo-p950"
@@ -278,7 +279,6 @@ Set initial brightness
 #+END_SRC
 
 ** System-wide packages
-- for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (packages (append (list
                                           ;l bash bash-completion
@@ -296,7 +296,7 @@ Set initial brightness
                      nix
                      ;; Drivers
                      nvidia-module
-                     nvidia-libs
+                     ;;nvidia-libs
                      ;; For user mounts
                      gvfs
                      ;; for HTTPS access
