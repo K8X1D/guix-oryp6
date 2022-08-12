@@ -61,12 +61,6 @@ Machines tested on:
    xorg)
 #+END_SRC
 
-** Extra config
-Graft for mesa with libglvnd support for nvidia 510.73
-#+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-;; make sure you downloaded this file too
-;;(load "./gtransform.scm")
-#+END_SRC
 
 * Custom configurations
 ** Reverse prime configuration
@@ -110,15 +104,13 @@ Graft for mesa with libglvnd support for nvidia 510.73
 #+END_SRC
 
 ** Xorg configuration
-- for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (define my-xorg-conf
     (xorg-configuration
      (keyboard-layout my-keyboard-layout)
      (modules
       (cons*
-       nvidia-driver
-       ;;     nvidia-module
+       nvidia-module
        (remove
         (lambda (pkg)
           (member pkg
@@ -201,11 +193,9 @@ Set initial brightness
 #+END_SRC
 
 ** Kernel
-- for nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
   (kernel linux-lts)
-  (kernel-loadable-modules (list nvidia-driver))
-  ;;(kernel-loadable-modules (list nvidia-module))
+  (kernel-loadable-modules (list nvidia-module))
   (kernel-arguments (list
                      ;; Nvidia set-up
                      "nvidia-drm.modeset=1"
@@ -305,8 +295,7 @@ Set initial brightness
                      ;;k8x1d-dwm k8x1d-st
                      nix
                      ;; Drivers
-                     nvidia-driver
-                     ;; nvidia-module
+                     nvidia-module
                      nvidia-libs
                      ;; For user mounts
                      gvfs
@@ -324,8 +313,7 @@ Set initial brightness
 
 *** Nvidia
 #+BEGIN_SRC scheme :tangle ~/.config/guix/system.scm :noweb yes
-  (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
-;;(simple-service 'custom-udev-rules udev-service-type (list nvidia-module))
+(simple-service 'custom-udev-rules udev-service-type (list nvidia-module))
   (service kernel-module-loader-service-type
            '("nvidia"
              "nvidia_modeset"))
