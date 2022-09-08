@@ -1,0 +1,29 @@
+#+TITLE:  K8X1D Oryp6 configuration
+#+AUTHOR: Kevin Kaiser
+#+AUTHOR: k8x1d@proton.me
+
+** Context of the project
+
+*** Machine description:
+- intel card
+- nvidia card
+
+*** What is working ?
+- nvidia dynamic powermanagement
+- gpu hdmi 
+
+
+*** What is not working ?
+
+** Content of the project
+
+** To deploy
+1. Clone the configuration 
+#+BEGIN_SRC sh
+git clone https://gitlab.com/oryp6/guix_set-up/guix-dotfiles.git ~/.config/guix
+#+END_SRC 
+
+2. Reconfigure guix
+#+BEGIN_SRC sh
+sudo guix system reconfigure ~/.config/guix/system.scm
+#+END_SRC 
