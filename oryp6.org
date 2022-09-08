@@ -769,7 +769,6 @@ do
 done
 #+END_SRC
 
-
 ** Other packages manager
 Guix lack some useful packages that are accessible thought nix and flatpak.
 The general rule used here follow this hierarchie of preference:
@@ -820,4 +819,41 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 flatpak install flathub --user com.sindresorhus.Caprine
 flatpak install flathub --user us.zoom.Zoom
 
+#+END_SRC
+
+** Activate manifest
+# TODO: create explicit script to do so
+
+* Manifest
+
+** Emacs
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
+(specifications->manifest
+ '(
+#+END_SRC
+
+*** Packages
+Emacs distribution
+#+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
+"emacs-native-comp"
+#+END_SRC
+
+Fonts
+#+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
+"font-dejavu"
+#+END_SRC
+
+Tools to build emacs vterm
+#+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
+"cmake"
+"make"
+"gcc-toolchain"
+"libtool"
+"perl"
+#+END_SRC
+
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
+))
 #+END_SRC

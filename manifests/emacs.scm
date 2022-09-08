@@ -1,20 +1,14 @@
-  (specifications->manifest
-   '(
-     ;;"emacs-next-pgtk"
-     "emacs-native-comp"
+(specifications->manifest
+ '(
 
-  "font-juliamono"
-  "font-dejavu"
-  "font-hack"
-  "font-fira-sans"
-  "font-fira-code"
-  "font-fira-mono"
-  "font-iosevka"
-  "font-overpass"
+"emacs-native-comp"
 
-  "graphviz"
+"font-dejavu"
 
-  "cmake"
-  ;;"libvterm"
+"cmake"
+"make"
+"gcc-toolchain"
+"libtool"
+"perl"
 
-  ))
+))
