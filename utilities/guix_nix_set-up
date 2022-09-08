@@ -1,0 +1,35 @@
+#!/home/k8x1d/.guix-profile/bin/bash
+nix-channel --add https://nixos.org/channels/nixpkgs-unstable
+nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
+nix-channel --update
+nix-env -iA \
+    nixpkgs.zotero \
+    nixpkgs.julia-bin \
+    nixpkgs.neovim \
+    nixpkgs.luajitPackages.luarocks \
+    nixpkgs.cargo \
+    nixpkgs.tree-sitter \
+    nixpkgs.sumneko-lua-language-server \
+    nixpkgs.nodePackages.coc-clangd \
+    nixpkgs.nodePackages.bash-language-server \
+    nixpkgs.nodePackages.pyright \
+    nixpkgs.nodePackages.npm \
+    nixpkgs.texlab \
+    nixpkgs.zathura \
+    nixpkgs.glow \
+    nixpkgs.vscode \
+    nixpkgs.spotify \
+    nixpkgs.teams \
+    nixpkgs.discord \
+    nixpkgs.slack \
+    nixpkgs.signal-desktop \
+    nixpkgs.protonvpn-cli \
+    nixpkgs.brave \
+    nixpkgs.android-file-transfer \
+    nixpkgs.system76-firmware \
+    nixpkgs.mesa \
+    nixpkgs.glibcLocales \
+    nixgl.auto.nixGLNvidia
+
+
+ln -s /nix/var/nix/profiles/per-user/k8x1d/profile ~/.nix-profile
