@@ -34,6 +34,7 @@ Machines tested on:
    audio ;; mpd
    databases ;; postgresql
    pm ;; tlp, thermald
+   lightdm ;; lightdm
    )
 #+END_SRC
 
@@ -468,11 +469,17 @@ Set initial brightness
 
 
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
-(service slim-service-type (slim-configuration
-                            (display ":0")
-                            (vt "vt7")
-                            (default-user "k8x1d")
-                            (xorg-configuration my-xorg-conf)))
+(service lightdm-service-type (lightdm-configuration
+                               (xorg-configuration my-xorg-conf)))
+#+END_SRC
+
+
+#+BEGIN_SRC scheme :tangle system.scm :noweb yes
+;;(service slim-service-type (slim-configuration
+;;                            (display ":0")
+;;                            (vt "vt7")
+;;                            (default-user "k8x1d")
+;;                            (xorg-configuration my-xorg-conf)))
 #+END_SRC
 
 
@@ -782,18 +789,6 @@ nix-channel --update
 nix-env -iA \
     nixpkgs.zotero \
     nixpkgs.julia-bin \
-    nixpkgs.neovim \
-    nixpkgs.luajitPackages.luarocks \
-    nixpkgs.cargo \
-    nixpkgs.tree-sitter \
-    nixpkgs.sumneko-lua-language-server \
-    nixpkgs.nodePackages.coc-clangd \
-    nixpkgs.nodePackages.bash-language-server \
-    nixpkgs.nodePackages.pyright \
-    nixpkgs.nodePackages.npm \
-    nixpkgs.texlab \
-    nixpkgs.zathura \
-    nixpkgs.glow \
     nixpkgs.vscode \
     nixpkgs.spotify \
     nixpkgs.teams \
@@ -823,9 +818,20 @@ flatpak install flathub --user us.zoom.Zoom
 
 ** Activate manifest
 # TODO: create explicit script to do so
+See https://guix.gnu.org/cookbook/en/html_node/Basic-setup-with-manifests.html
+#+BEGIN_SRC bash :tangle utilities/R_set-up :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
+mkdir -p "$GUIX_EXTRA_PROFILES"/R # if it does not exist yet
+guix package --substitute-urls="https://substitutes.guix.psychnotebook.org https://substitutes.nonguix.org https://ci.guix.gnu.org" --manifest=$HOME/.config/guix/manifests/R.scm --profile="$GUIX_EXTRA_PROFILES"/R/R
+#+END_SRC
+
+#+BEGIN_SRC bash :tangle utilities/neovim_set-up :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
+mkdir -p "$GUIX_EXTRA_PROFILES"/neovim # if it does not exist yet
+guix package --manifest=$HOME/.config/guix/manifests/neovim.scm --profile="$GUIX_EXTRA_PROFILES"/neovim/neovim
+#+END_SRC
 
 * Manifest
-
 ** Emacs
 *** Header
 #+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
@@ -855,5 +861,62 @@ Tools to build emacs vterm
 
 *** Header
 #+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
+))
+#+END_SRC
+
+
+** R
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
+(specifications->manifest
+ '(
+#+END_SRC
+
+*** Packages
+Emacs distribution
+#+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
+"r"
+#+END_SRC
+
+IDE
+#+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
+"rstudio"
+#+END_SRC
+
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
+))
+#+END_SRC
+
+** Neovim
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
+(specifications->manifest
+ '(
+#+END_SRC
+
+*** Packages
+Neovim distribution
+#+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
+"neovim"
+#+END_SRC
+
+General
+#+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
+"node"
+#+END_SRC
+
+Syntax highlighter
+#+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
+"tree-sitter"
+#+END_SRC
+
+LSP
+#+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
+"rust-cargo"
+#+END_SRC
+
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
 ))
 #+END_SRC

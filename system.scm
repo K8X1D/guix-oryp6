@@ -17,6 +17,7 @@
    audio ;; mpd
    databases ;; postgresql
    pm ;; tlp, thermald
+   lightdm ;; lightdm
    )
 
 (use-package-modules
@@ -362,11 +363,14 @@
             ;;(xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
             ;;(xorg-configuration my-xorg-conf)))
 
-(service slim-service-type (slim-configuration
-                            (display ":0")
-                            (vt "vt7")
-                            (default-user "k8x1d")
-                            (xorg-configuration my-xorg-conf)))
+(service lightdm-service-type (lightdm-configuration
+                               (xorg-configuration my-xorg-conf)))
+
+;;(service slim-service-type (slim-configuration
+;;                            (display ":0")
+;;                            (vt "vt7")
+;;                            (default-user "k8x1d")
+;;                            (xorg-configuration my-xorg-conf)))
 
 ;;  (service gdm-service-type
 ;;           (gdm-configuration

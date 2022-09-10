@@ -1,0 +1,8 @@
+(specifications->manifest
+ '(
+
+"r"
+
+"rstudio"
+
+))

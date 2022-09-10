@@ -5,18 +5,6 @@ nix-channel --update
 nix-env -iA \
     nixpkgs.zotero \
     nixpkgs.julia-bin \
-    nixpkgs.neovim \
-    nixpkgs.luajitPackages.luarocks \
-    nixpkgs.cargo \
-    nixpkgs.tree-sitter \
-    nixpkgs.sumneko-lua-language-server \
-    nixpkgs.nodePackages.coc-clangd \
-    nixpkgs.nodePackages.bash-language-server \
-    nixpkgs.nodePackages.pyright \
-    nixpkgs.nodePackages.npm \
-    nixpkgs.texlab \
-    nixpkgs.zathura \
-    nixpkgs.glow \
     nixpkgs.vscode \
     nixpkgs.spotify \
     nixpkgs.teams \

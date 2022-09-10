@@ -3,17 +3,26 @@
 #+AUTHOR: k8x1d@proton.me
 
 ** Context of the project
+This guix configuration aims the gives basis set-up for a System76 Oryx Pro laptop.  
+
+ It is configurated for my own use, but some of the configuration (reverse prime, nvidia dynamic powermanagement, wifi support) could be reused.  
+
+ It sadly had to rely on some of non-free software support for hardware consideration. For support for non-free software on guix (for laptop that heavily really on thoses), see [[https://gitlab.com/nonguix/nonguix][nonguix channel]].
 
 *** Machine description:
-- intel card
-- nvidia card
+- Intel i7-10875H cpu
+- NVIDIA GeForce RTX 2060
+- Intel Wi-Fi 6 AX200/AX201
+
+  See [[https://tech-docs.system76.com/models/oryp6/README.html][technical manual]] for more information.
 
 *** What is working ?
 - nvidia dynamic powermanagement
-- gpu hdmi 
-
+- gpu  hdmi
 
 *** What is not working ?
+**** Julia
+- [[https://github.com/JuliaGPU/CUDA.jl][CUDA.jl]]
 
 ** Content of the project
 
