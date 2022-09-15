@@ -1,7 +1,8 @@
 (specifications->manifest
  '(
 
-"emacs-native-comp"
+;;"emacs-native-comp"
+"emacs-next-pgtk"
 
 "font-dejavu"
 

@@ -17,7 +17,8 @@
    audio ;; mpd
    databases ;; postgresql
    pm ;; tlp, thermald
-   lightdm ;; lightdm
+   sddm ;;sddm
+   ;;lightdm ;; lightdm
    )
 
 (use-package-modules
@@ -159,8 +160,8 @@
     (operating-system
 
   (host-name "oryp6")
-  (timezone "America/Edmonton")
-  ;;(timezone "America/New_York")
+  ;;(timezone "America/Edmonton")
+  (timezone "America/New_York")
   (locale "en_US.utf8")
   (keyboard-layout my-keyboard-layout)
 
@@ -252,7 +253,7 @@
                      ;; i3 set-up
                      i3-gaps polybar dmenu i3lock alacritty feh picom redshift pavucontrol xset setxkbmap xinput
                      ;; sway set-up
-                     ;;sway swayidle waybar bemenu swaylock-effects foot
+                     sway swayidle swaybg waybar bemenu swaylock-effects foot
                      ;;awesome-wm
                      ;;awesome
                      ;;stumpwm
@@ -351,20 +352,23 @@
 
   (screen-locker-service i3lock)
 
-  ;;(service sddm-service-type
-           ;;(sddm-configuration
-            ;;(themes-directory "/shared/Documents/Logiciels/guix_set-up/sddm/themes")
-            ;;(theme "sugar-dark")
+;;(service sddm-service-type
+;;         (sddm-configuration
+;;          (xorg-configuration my-xorg-conf)))
+(service sddm-service-type
+(sddm-configuration
+(themes-directory "/shared/Documents/Logiciels/guix_set-up/sddm/themes")
+(theme "sugar-dark")
             ;;;;(sddm (fixpkg sddm)) ;; seem to cause black screen
             ;;;;(xdisplay-start "/home/k8x1d/start-up")
             ;;;;(xsession-command "/shared/Projects/Logiciels/.xinitrc") ;; test
             ;;;;(xsession-command picom)
-            ;;;;(sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
-            ;;(xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
-            ;;(xorg-configuration my-xorg-conf)))
+            (sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
+;;(xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
+(xorg-configuration my-xorg-conf)))
 
-(service lightdm-service-type (lightdm-configuration
-                               (xorg-configuration my-xorg-conf)))
+;;(service lightdm-service-type (lightdm-configuration
+;;                               (xorg-configuration my-xorg-conf)))
 
 ;;(service slim-service-type (slim-configuration
 ;;                            (display ":0")
