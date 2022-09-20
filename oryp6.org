@@ -928,7 +928,7 @@ Remote desktop
 
 Mpd client
 #+BEGIN_SRC scheme :tangle manifests/desktop.scm
-"mpc-mpd"
+"mpd-mpc"
 #+END_SRC
 
 Word processors

@@ -12,7 +12,7 @@
 "openconnect"
 "rdesktop"
 
-"mpc-mpd"
+"mpd-mpc"
 
 "libreoffice"
 "texlive"
