@@ -1,4 +1,4 @@
-#!/home/k8x1d/.guix-profile/bin/bash
+#!/bin/sh
 GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
 mkdir -p "$GUIX_EXTRA_PROFILES"/emacs # if it does not exist yet
 guix package --manifest=$HOME/.config/guix/manifests/emacs.scm --profile="$GUIX_EXTRA_PROFILES"/emacs/emacs

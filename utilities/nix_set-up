@@ -5,7 +5,10 @@ nix-env -iA \
     nixpkgs.zotero \
     nixpkgs.julia-bin \
     nixpkgs.vscode \
+    nixpkgs.neovim \
     nixpkgs.signal-desktop \
+    nixpkgs.slack \
+    nixpkgs.discord \
     nixpkgs.protonvpn-cli \
     nixpkgs.brave \
     nixpkgs.android-file-transfer \

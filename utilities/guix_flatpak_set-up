@@ -1,4 +1,4 @@
-#!/home/k8x1d/.guix-profile/bin/bash
+#!/bin/sh
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak install flathub --user com.sindresorhus.Caprine

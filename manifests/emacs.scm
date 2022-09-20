@@ -4,12 +4,14 @@
 ;;"emacs-native-comp"
 "emacs-next-pgtk"
 
-"font-dejavu"
+"git"
 
 "cmake"
 "make"
 "gcc-toolchain"
 "libtool"
 "perl"
+
+"password-store"
 
 ))

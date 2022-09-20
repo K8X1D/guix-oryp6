@@ -25,10 +25,12 @@
  certs ;; nss-certs
  databases ;; postgresql
  xdisorg ;; redshift
- fonts ;; dejavu, juliamono
- suckless ;; dmenu
+ fonts ;; dejavu, juliamono, freefont
  gnome ;; network-manager-openvpn
  wm ;; 13
+ music ;; playctl
+ linux ;; brightnessctl
+ dunst ;; dunst
  terminals ;; alacritty
  freedesktop ;; libinput
  package-management ;; for nix
@@ -208,7 +210,7 @@
   ;; and the EFI System Partition has UUID 1234-ABCD.
   (file-systems (append
                  (list (file-system
-                        (device (uuid "951e7b1c-d128-43b2-8a59-fbea0168a57c" 'ext4))
+                        (device (uuid "e896af2f-15f1-4503-9564-975e93e79f40" 'ext4))
                         (mount-point "/")
                         (type "ext4"))
                        (file-system
@@ -246,22 +248,47 @@
                    %base-user-accounts))
 
   (packages (append (list
-                                          ;l bash bash-completion
                      ;; EXWM set-up
                      ;;emacs emacs-exwm emacs-desktop-environment
                      ;;emacs-next-pgtk
-                     ;; i3 set-up
-                     i3-gaps polybar dmenu i3lock alacritty feh picom redshift pavucontrol xset setxkbmap xinput
+
+                     ;; i3 set-up ;;;;
+                     i3-gaps ;; package version
+                     polybar ;; bar
+                     i3lock-color ;; lockscreen
+                     alacritty ;; terminal
+                     feh ;; wallpaper
+                     picom ;; compositor
+                     redshift ;; color temperature
+                     pavucontrol ;; pulseaudio gui
+                     pulseaudio ;; pulseaudio cli
+                     xset ;; set keyboard rate
+                     setxkbmap ;; set keyboard-layout
+                     xss-lock ;; manage lock before-sleep
+                     xinput ;; set touchpad
+                     xrandr ;; screen manipulation
+                     playerctl ;; extra
+                     rofi ;;launcher
+                     brightnessctl ;; brightness
+                     dunst ;; notifications
+
                      ;; sway set-up
-                     sway swayidle swaybg waybar bemenu swaylock-effects foot
+                     sway swayidle swaybg waybar bemenu swaylock-effects foot libnotify fnott
+                     ;; Bluetooth
+                     bluez
+                     ;; utilities
+                     acpi
                      ;;awesome-wm
                      ;;awesome
                      ;;stumpwm
                      ;;sbcl stumpwm `(,stumpwm "lib")
-                     font-dejavu font-juliamono
-                     ;;engstrand-dwm engstrand-dsblocks engstrand-st
-                     ;;k8x1d-dwm k8x1d-st
-                     nix
+
+                     ;; Power management
+                     tlp
+                     ;; Fonts
+                     font-dejavu font-juliamono font-gnu-freefont
+                     ;; Extra packages
+                     nix flatpak
                      ;; Drivers
                      nvidia-driver
                      ;; nvidia-module
@@ -272,8 +299,6 @@
                      nss-certs)
                     %base-packages))
 
-      ;; Use the "desktop" services, which include the X11
-      ;; log-in service, networking with NetworkManager, and more.
       (services (cons*
 
 ;;(service gnome-desktop-service-type)
@@ -350,7 +375,8 @@
   (bluetooth-service #:auto-enable? #f)
   (service nix-service-type)
 
-  (screen-locker-service i3lock)
+(screen-locker-service i3lock-color "i3lock")
+(screen-locker-service swaylock-effects "swaylock")
 
 ;;(service sddm-service-type
 ;;         (sddm-configuration

@@ -1,10 +1,11 @@
+:DOC-CONFIG:
+#+PROPERTY: header-args :mkdirp yes
+#+STARTUP: fold
+:END:
+
 #+TITLE: K8x1d Oryp6: configuration file(s)
 #+AUTHOR: Kevin Kaiser
 #+EMAIL: k8x1d@protonmail.ch
-#+EXPORT_SELECT_TAGS: export
-#+EXPORT_EXCLUDE_TAGS: noexport
-#+PROPERTY: header-args :mkdirp yes
-#+STARTUP: showall
 
 # TODO: add manifest
 * Description of the system
@@ -45,10 +46,12 @@ Machines tested on:
  certs ;; nss-certs
  databases ;; postgresql
  xdisorg ;; redshift
- fonts ;; dejavu, juliamono
- suckless ;; dmenu
+ fonts ;; dejavu, juliamono, freefont
  gnome ;; network-manager-openvpn
  wm ;; 13
+ music ;; playctl
+ linux ;; brightnessctl
+ dunst ;; dunst
  terminals ;; alacritty
  freedesktop ;; libinput
  package-management ;; for nix
@@ -266,7 +269,7 @@ Set initial brightness
   ;; and the EFI System Partition has UUID 1234-ABCD.
   (file-systems (append
                  (list (file-system
-                        (device (uuid "951e7b1c-d128-43b2-8a59-fbea0168a57c" 'ext4))
+                        (device (uuid "e896af2f-15f1-4503-9564-975e93e79f40" 'ext4))
                         (mount-point "/")
                         (type "ext4"))
                        (file-system
@@ -312,22 +315,47 @@ Set initial brightness
 ** System-wide packages
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   (packages (append (list
-                                          ;l bash bash-completion
                      ;; EXWM set-up
                      ;;emacs emacs-exwm emacs-desktop-environment
                      ;;emacs-next-pgtk
-                     ;; i3 set-up
-                     i3-gaps polybar dmenu i3lock alacritty feh picom redshift pavucontrol xset setxkbmap xinput
+
+                     ;; i3 set-up ;;;;
+                     i3-gaps ;; package version
+                     polybar ;; bar
+                     i3lock-color ;; lockscreen
+                     alacritty ;; terminal
+                     feh ;; wallpaper
+                     picom ;; compositor
+                     redshift ;; color temperature
+                     pavucontrol ;; pulseaudio gui
+                     pulseaudio ;; pulseaudio cli
+                     xset ;; set keyboard rate
+                     setxkbmap ;; set keyboard-layout
+                     xss-lock ;; manage lock before-sleep
+                     xinput ;; set touchpad
+                     xrandr ;; screen manipulation
+                     playerctl ;; extra
+                     rofi ;;launcher
+                     brightnessctl ;; brightness
+                     dunst ;; notifications
+
                      ;; sway set-up
-                     sway swayidle swaybg waybar bemenu swaylock-effects foot
+                     sway swayidle swaybg waybar bemenu swaylock-effects foot libnotify fnott
+                     ;; Bluetooth
+                     bluez
+                     ;; utilities
+                     acpi
                      ;;awesome-wm
                      ;;awesome
                      ;;stumpwm
                      ;;sbcl stumpwm `(,stumpwm "lib")
-                     font-dejavu font-juliamono
-                     ;;engstrand-dwm engstrand-dsblocks engstrand-st
-                     ;;k8x1d-dwm k8x1d-st
-                     nix
+
+                     ;; Power management
+                     tlp
+                     ;; Fonts
+                     font-dejavu font-juliamono font-gnu-freefont
+                     ;; Extra packages
+                     nix flatpak
                      ;; Drivers
                      nvidia-driver
                      ;; nvidia-module
@@ -340,18 +368,18 @@ Set initial brightness
 #+END_SRC
 
 ** Services specifications
+*** Header
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
-      ;; Use the "desktop" services, which include the X11
-      ;; log-in service, networking with NetworkManager, and more.
       (services (cons*
 #+END_SRC
 
-*** Gnome
+*** Services
+Gnome
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
 ;;(service gnome-desktop-service-type)
 #+END_SRC
 
-*** Nvidia
+Nvidia
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
 (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
 ;;(simple-service 'custom-udev-rules udev-service-type (list nvidia-module))
@@ -360,7 +388,7 @@ Set initial brightness
            "nvidia_modeset"))
            ;;"nvidia_uvm"))
 #+END_SRC
-*** Databases
+Databases
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
   (service postgresql-service-type
@@ -376,19 +404,19 @@ Set initial brightness
                     (create-database? #t))))))
 #+END_SRC
 
-*** Printers
+Printers
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   (service cups-service-type
            (cups-configuration
             (web-interface? #t)))
 #+END_SRC
 
-*** VPN
+VPN
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   ;;(openvpn-client-service)
 #+END_SRC
 
-*** Music
+Music
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
  ;; (service mpd-service-type
  ;;          (mpd-configuration
@@ -408,7 +436,7 @@ Set initial brightness
 
 #+END_SRC
 
-*** Power management
+Power management
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   ;;(service tlp-service-type
   ;;         (tlp-configuration
@@ -432,7 +460,7 @@ Set initial brightness
 #+END_SRC
 
 
-*** File-sharing
+File-sharing
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   ;; Torrents
   (service transmission-daemon-service-type
@@ -442,18 +470,19 @@ Set initial brightness
             (alt-speed-up 512)))          ; 512 kB/s
 #+END_SRC
 
-*** System commodities
+System commodities
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   (bluetooth-service #:auto-enable? #f)
   (service nix-service-type)
 #+END_SRC
 
-*** Lock screen
+Lock screen
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
-  (screen-locker-service i3lock)
+(screen-locker-service i3lock-color "i3lock")
+(screen-locker-service swaylock-effects "swaylock")
 #+END_SRC
 
-*** Login Managers
+Login Managers
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
 ;;(service sddm-service-type
 ;;         (sddm-configuration
@@ -494,11 +523,12 @@ Set initial brightness
 ;;            (xorg-configuration my-xorg-conf)))
 #+END_SRC
 
-*** Desktop services
+Desktop services
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   %my-desktop-services
 #+END_SRC
 
+*** Footer
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   ))
 #+END_SRC
@@ -551,19 +581,19 @@ Set initial brightness
       "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
 #+END_SRC
 
-** Flat channel
+** Flat channel (obsolete because of package emacs-next-pgtk)
 - Give access to (pgtk) native compilation emacs
 #+BEGIN_SRC scheme :tangle channels.scm :noweb yes
-  (channel
-   (name 'flat)
-   (url "https://github.com/flatwhatson/guix-channel.git")
-   (commit
-    "e57424b680e1724105e2598b68c30084b180cf58") ;; last upd: 03/09/2022
-   (introduction
-    (make-channel-introduction
-     "33f86a4b48205c0dc19d7c036c85393f0766f806"
-     (openpgp-fingerprint
-      "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
+ ;; (channel
+ ;;  (name 'flat)
+ ;;  (url "https://github.com/flatwhatson/guix-channel.git")
+ ;;  (commit
+ ;;   "e57424b680e1724105e2598b68c30084b180cf58") ;; last upd: 03/09/2022
+ ;;  (introduction
+ ;;   (make-channel-introduction
+ ;;    "33f86a4b48205c0dc19d7c036c85393f0766f806"
+ ;;    (openpgp-fingerprint
+ ;;     "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
 #+END_SRC
 
 ** dwl-guile channel
@@ -733,18 +763,18 @@ Set initial brightness
 
 ** Emacs daemon
 #+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/emacsd.scm :noweb yes
-(define emacsd
-  (make <service>
-    #:provides '(emacsd)
-    #:docstring "Emacs daemon"
-    #:start (make-forkexec-constructor
-              '("emacs" "--daemon"))
-    #:stop (make-kill-destructor)
-    #:respawn? #f))
-(register-services emacsd)
-
-;;(start emacsd)
-  (start-in-the-background '(emacsd))
+;;(define emacsd
+;;  (make <service>
+;;    #:provides '(emacsd)
+;;    #:docstring "Emacs daemon"
+;;    #:start (make-forkexec-constructor
+;;              '("emacs" "--daemon"))
+;;    #:stop (make-kill-destructor)
+;;    #:respawn? #f))
+;;(register-services emacsd)
+;;
+;;;;(start emacsd)
+;;  (start-in-the-background '(emacsd))
 #+END_SRC
 
 ** Color temperature adjustment
@@ -763,7 +793,7 @@ Set initial brightness
 #+END_SRC
 * Utilities
 ** Battery notifications
-#+BEGIN_SRC bash :tangle utilities/battery_notifications.sh :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+#+BEGIN_SRC bash :tangle utilities/battery_notifications.sh :shebang "#!/bin/sh"
 # inspired by https://askubuntu.com/questions/518928/how-to-write-a-script-to-listen-to-battery-status-and-alert-me-when-its-above
 warning_level=30
 critic_level=10
@@ -786,33 +816,28 @@ The general rule used here follow this hierarchie of preference:
 guix > nix > flatpak
 
 *** Nix set-up
-#+BEGIN_SRC bash :tangle utilities/guix_nix_set-up :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+#+BEGIN_SRC bash :tangle utilities/nix_set-up :shebang "#!/bin/sh"
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable
-nix-channel --add https://github.com/guibou/nixGL/archive/main.tar.gz nixgl
 nix-channel --update
 nix-env -iA \
     nixpkgs.zotero \
     nixpkgs.julia-bin \
     nixpkgs.vscode \
-    nixpkgs.spotify \
-    nixpkgs.teams \
-    nixpkgs.discord \
-    nixpkgs.slack \
+    nixpkgs.neovim \
     nixpkgs.signal-desktop \
+    nixpkgs.slack \
+    nixpkgs.discord \
     nixpkgs.protonvpn-cli \
     nixpkgs.brave \
     nixpkgs.android-file-transfer \
-    nixpkgs.system76-firmware \
-    nixpkgs.mesa \
-    nixpkgs.glibcLocales \
-    nixgl.auto.nixGLNvidia
+    nixpkgs.system76-firmware
 
 
 ln -s /nix/var/nix/profiles/per-user/k8x1d/profile ~/.nix-profile
 #+END_SRC
 
 *** Flatpak set-up
-#+BEGIN_SRC bash :tangle utilities/guix_flatpak_set-up :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+#+BEGIN_SRC bash :tangle utilities/guix_flatpak_set-up :shebang "#!/bin/sh"
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 flatpak install flathub --user com.sindresorhus.Caprine
@@ -823,25 +848,112 @@ flatpak install flathub --user us.zoom.Zoom
 ** Activate manifest
 # TODO: create explicit script to do so
 See https://guix.gnu.org/cookbook/en/html_node/Basic-setup-with-manifests.html
-#+BEGIN_SRC bash :tangle utilities/R_set-up :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+#+BEGIN_SRC bash :tangle utilities/R_set-up :shebang "#!/bin/sh"
 GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
 mkdir -p "$GUIX_EXTRA_PROFILES"/R # if it does not exist yet
 guix package --substitute-urls="https://substitutes.guix.psychnotebook.org https://substitutes.nonguix.org https://ci.guix.gnu.org" --manifest=$HOME/.config/guix/manifests/R.scm --profile="$GUIX_EXTRA_PROFILES"/R/R
 #+END_SRC
 
-#+BEGIN_SRC bash :tangle utilities/neovim_set-up :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+#+BEGIN_SRC bash :tangle utilities/python_set-up :shebang "#!/bin/sh"
+GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
+mkdir -p "$GUIX_EXTRA_PROFILES"/python # if it does not exist yet
+guix package --manifest=$HOME/.config/guix/manifests/python.scm --profile="$GUIX_EXTRA_PROFILES"/python/python
+#+END_SRC
+
+#+BEGIN_SRC bash :tangle utilities/neovim_set-up :shebang "#!/bin/sh"
 GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
 mkdir -p "$GUIX_EXTRA_PROFILES"/neovim # if it does not exist yet
 guix package --manifest=$HOME/.config/guix/manifests/neovim.scm --profile="$GUIX_EXTRA_PROFILES"/neovim/neovim
 #+END_SRC
 
-#+BEGIN_SRC bash :tangle utilities/emacs_set-up :shebang "#!/home/k8x1d/.guix-profile/bin/bash"
+#+BEGIN_SRC bash :tangle utilities/emacs_set-up :shebang "#!/bin/sh"
 GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
 mkdir -p "$GUIX_EXTRA_PROFILES"/emacs # if it does not exist yet
 guix package --manifest=$HOME/.config/guix/manifests/emacs.scm --profile="$GUIX_EXTRA_PROFILES"/emacs/emacs
 #+END_SRC
 
+#+BEGIN_SRC bash :tangle utilities/desktop_set-up :shebang "#!/bin/sh"
+GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
+mkdir -p "$GUIX_EXTRA_PROFILES"/desktop # if it does not exist yet
+guix package --manifest=$HOME/.config/guix/manifests/desktop.scm --profile="$GUIX_EXTRA_PROFILES"/desktop/desktop
+#+END_SRC
+
+** Multihead set-up
+#+BEGIN_SRC bash :tangle utilities/multihead_set-up :shebang "#!/bin/sh"
+xrandr --output eDP-1 --auto --output HDMI-1-0 --auto --right-of eDP-1
+#+END_SRC
+
+** Polybar set-up
+#+BEGIN_SRC bash :tangle utilities/polybar_set-up :shebang "#!/bin/sh"
+killall polybar
+for m in $(polybar --list-monitors | cut -d":" -f1); do
+    MONITOR=$m polybar --reload example &
+done
+#+END_SRC
+
 * Manifest
+** Desktop
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm :noweb yes
+(specifications->manifest
+ '(
+#+END_SRC
+
+*** Packages
+Browsers
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"firefox"
+#+END_SRC
+
+Images manipulation
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"gimp"
+#+END_SRC
+
+Zip
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"unzip"
+#+END_SRC
+
+Ssh
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"openssh"
+#+END_SRC
+
+Remote desktop
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"openconnect"
+"rdesktop"
+#+END_SRC
+
+Mpd client
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"mpc-mpd"
+#+END_SRC
+
+Word processors
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"libreoffice"
+"texlive"
+#+END_SRC
+
+Monitoring
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"htop"
+#+END_SRC
+
+Gtk configuration
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"lxappearance"
+#+END_SRC
+
+*** Footer
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+))
+#+END_SRC
+
+
+
 ** Emacs
 *** Header
 #+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
@@ -856,9 +968,9 @@ Emacs distribution
 "emacs-next-pgtk"
 #+END_SRC
 
-Fonts
+Tools for straight.el
 #+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
-"font-dejavu"
+"git"
 #+END_SRC
 
 Tools to build emacs vterm
@@ -870,7 +982,12 @@ Tools to build emacs vterm
 "perl"
 #+END_SRC
 
-*** Header
+Pass
+#+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
+"password-store"
+#+END_SRC
+
+*** Footer
 #+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
 ))
 #+END_SRC
@@ -894,12 +1011,61 @@ IDE
 "rstudio"
 #+END_SRC
 
-*** Header
+C Library
+#+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
+"libxml2"
+#+END_SRC
+
+R Library
+#+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
+"r-here"
+"r-languageserver"
+"r-tibble"
+"r-future"
+"r-readr"
+"r-magrittr"
+"r-plyr"
+"r-dplyr"
+"r-purrr"
+"r-furrr"
+"r-rjson"
+#+END_SRC
+
+*** Footer
 #+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
 ))
 #+END_SRC
 
-** Neovim
+** Python
+*** Header
+#+BEGIN_SRC scheme :tangle manifests/python.scm :noweb yes
+(specifications->manifest
+ '(
+#+END_SRC
+
+*** Packages
+python distribution
+#+BEGIN_SRC scheme :tangle manifests/python.scm :noweb yes
+"python"
+#+END_SRC
+
+Package manager
+#+BEGIN_SRC scheme :tangle manifests/python.scm :noweb yes
+"python-pip"
+#+END_SRC
+
+Dependencies
+#+BEGIN_SRC scheme :tangle manifests/python.scm :noweb yes
+"ffmpeg" ;;yt-dlp
+#+END_SRC
+
+*** Footer
+#+BEGIN_SRC scheme :tangle manifests/python.scm :noweb yes
+))
+#+END_SRC
+
+
+** Neovim (doesn't work... c library not up-to-date, neorg failed)
 *** Header
 #+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
 (specifications->manifest
@@ -927,7 +1093,7 @@ LSP
 "rust-cargo"
 #+END_SRC
 
-*** Header
+*** Footer
 #+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
 ))
 #+END_SRC
