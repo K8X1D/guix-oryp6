@@ -3,10 +3,19 @@
 
 "neovim"
 
+"curl"
+"python"
+
+"gcc-toolchain"
+"git"
 "node"
 
-"tree-sitter"
+"ripgrep"
+"fd"
 
-"rust-cargo"
+"zathura"
+"zathura-pdf-poppler"
+"xdotool"
+"biber"
 
 ))

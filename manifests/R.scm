@@ -7,6 +7,8 @@
 
 "libxml2"
 
+"openjdk"
+
 "r-here"
 "r-languageserver"
 "r-tibble"
@@ -18,5 +20,6 @@
 "r-purrr"
 "r-furrr"
 "r-rjson"
+"r-profvis"
 
 ))

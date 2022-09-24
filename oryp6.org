@@ -228,11 +228,14 @@ Set initial brightness
                      "nvidia_drm.modeset=1"
                      "nvidia.NVreg_DynamicPowerManagement=0x02"
                      "modprobe.blacklist=nouveau"
+                     "modprobe.blacklist=i2c_nvidia_gpu"
                      ;; Fix audio problem: headphone hissing on right ear; cost: loose microphone for headphone
                      ;;"snd_hda_intel.model=clevo-p950"
                      ;;"snd-hda-intel.power-save=0"
                      ;;"snd_hda_intel.power_save=0"
-                     "nmi_watchdog=0"))
+                     ;; hibernate to swap
+                    "resume=/dev/sda2"
+                    "nmi_watchdog=0"))
   (initrd microcode-initrd)
   (initrd-modules %base-initrd-modules)
   (firmware (list linux-firmware))
@@ -265,38 +268,44 @@ Set initial brightness
 
 ** Filesystem
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
-  ;; Assume the target root file system is labelled "my-root",
-  ;; and the EFI System Partition has UUID 1234-ABCD.
-  (file-systems (append
-                 (list (file-system
-                        (device (uuid "e896af2f-15f1-4503-9564-975e93e79f40" 'ext4))
-                        (mount-point "/")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "e45224c0-20bd-4ba8-880d-2bb84827dce7" 'ext4))
-                        (mount-point "/home")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "7eb6c440-b26d-48d9-b8e9-bce47a46dfa1" 'ext4))
-                        (mount-point "/shared")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "d3900119-e611-4e5a-887c-cd1dbf3711b4" 'ext4))
-                        (mount-point "/extension")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "0554-6F13" 'fat))
-                        (mount-point "/boot/efi")
-                        (type "vfat")))
-                 %base-file-systems))
+(file-systems (append
+               (list
+                ;; boot
+                (file-system
+                 (device (uuid "0554-6F13" 'fat))
+                 (mount-point "/boot/efi")
+                 (type "vfat"))
+                ;; root
+                (file-system
+                 (device (uuid "e896af2f-15f1-4503-9564-975e93e79f40" 'ext4))
+                 (mount-point "/")
+                 (type "ext4"))
+                ;; home
+                (file-system
+                 (device (uuid "e45224c0-20bd-4ba8-880d-2bb84827dce7" 'ext4))
+                 (mount-point "/home")
+                 (type "ext4"))
+                ;; shared volume
+                (file-system
+                 (device (uuid "7eb6c440-b26d-48d9-b8e9-bce47a46dfa1" 'ext4))
+                 (mount-point "/shared")
+                 (type "ext4"))
+                ;; second harddrive
+                (file-system
+                 (device (uuid "d3900119-e611-4e5a-887c-cd1dbf3711b4" 'ext4))
+                 (mount-point "/extension")
+                 (type "ext4"))
+                )
+               %base-file-systems))
 #+END_SRC
 
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
   (swap-devices (list
                  (swap-space
                   (target
-                   (uuid "6e1c9e15-4904-4d63-877d-2001773ec067"))))) ;; test
+                   (uuid "01278a0f-360c-47be-a63d-31376dab09d4")))))
 #+END_SRC
+
 
 ** User(s)
 #+BEGIN_SRC scheme :tangle system.scm :noweb yes
@@ -338,6 +347,7 @@ Set initial brightness
                      rofi ;;launcher
                      brightnessctl ;; brightness
                      dunst ;; notifications
+                     xclip ;; clipboard
 
                      ;; sway set-up
                      sway swayidle swaybg waybar bemenu swaylock-effects foot libnotify fnott
@@ -488,16 +498,16 @@ Login Managers
 ;;         (sddm-configuration
 ;;          (xorg-configuration my-xorg-conf)))
 (service sddm-service-type
-(sddm-configuration
-(themes-directory "/shared/Documents/Logiciels/guix_set-up/sddm/themes")
-(theme "sugar-dark")
+         (sddm-configuration
+          (themes-directory "/shared/Documents/Logiciels/guix_set-up/sddm/themes")
+          (theme "sugar-dark")
             ;;;;(sddm (fixpkg sddm)) ;; seem to cause black screen
             ;;;;(xdisplay-start "/home/k8x1d/start-up")
             ;;;;(xsession-command "/shared/Projects/Logiciels/.xinitrc") ;; test
             ;;;;(xsession-command picom)
-            (sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
-;;(xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
-(xorg-configuration my-xorg-conf)))
+          (sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
+          (xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
+          (xorg-configuration my-xorg-conf)))
 #+END_SRC
 
 
@@ -743,14 +753,15 @@ Desktop services
 ;;  ;;(start picom)
 #+END_SRC
 
-** Battery_notifications
+** Battery notifications (don't work)
+# TODO: repair service
 #+BEGIN_SRC scheme :tangle ~/.config/shepherd/init.d/battery_notifications.scm :noweb yes
     (define battery_notifications
       (make <service>
         #:provides '(battery_notifications)
         #:docstring "Run battery_notifications in the background"
         #:start (make-forkexec-constructor
-                  '("~/.config/guix/utilities/battery_notifications.sh"))
+                  '("/home/k8x1d/.config/guix/utilities/battery_notifications.sh"))
         #:stop (make-kill-destructor)
         #:respawn? #t))
     (register-services battery_notifications)
@@ -802,9 +813,9 @@ do
    battery_level=`acpi -b | grep -P -o '[0-9]+(?=%)'`
    battery_charging=`acpi -b | grep -c 'Charging'`
    if [ $battery_level -le $warning_level ] && [ $battery_level -gt $critic_level ] && [ $battery_charging -eq "0" ]; then
-       dunstify "Battery getting low..." "$battery_level% left"    
+       dunstify "Battery getting low..." "$battery_level% left"
    elif [ $battery_level -le $critic_level ] && [ $battery_charging -eq "0" ]; then
-       dunstify "Critically low battery level..." "$battery_level% left"    
+       dunstify "Critically low battery level..." "$battery_level% left"
    fi
     sleep 300 # 300 seconds or 5 minutes
 done
@@ -823,15 +834,11 @@ nix-env -iA \
     nixpkgs.zotero \
     nixpkgs.julia-bin \
     nixpkgs.vscode \
-    nixpkgs.neovim \
     nixpkgs.signal-desktop \
-    nixpkgs.slack \
-    nixpkgs.discord \
-    nixpkgs.protonvpn-cli \
     nixpkgs.brave \
     nixpkgs.android-file-transfer \
-    nixpkgs.system76-firmware
-
+    nixpkgs.system76-firmware \
+    nixpkgs.glab
 
 ln -s /nix/var/nix/profiles/per-user/k8x1d/profile ~/.nix-profile
 #+END_SRC
@@ -875,7 +882,13 @@ guix package --manifest=$HOME/.config/guix/manifests/emacs.scm --profile="$GUIX_
 #+BEGIN_SRC bash :tangle utilities/desktop_set-up :shebang "#!/bin/sh"
 GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
 mkdir -p "$GUIX_EXTRA_PROFILES"/desktop # if it does not exist yet
-guix package --manifest=$HOME/.config/guix/manifests/desktop.scm --profile="$GUIX_EXTRA_PROFILES"/desktop/desktop
+guix package --fallback --manifest=$HOME/.config/guix/manifests/desktop.scm --profile="$GUIX_EXTRA_PROFILES"/desktop/desktop
+#+END_SRC
+
+#+BEGIN_SRC bash :tangle utilities/doom-emacs_set-up :shebang "#!/bin/sh"
+GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
+mkdir -p "$GUIX_EXTRA_PROFILES"/doom-emacs # if it does not exist yet
+guix package --manifest=$HOME/.config/guix/manifests/doom-emacs.scm --profile="$GUIX_EXTRA_PROFILES"/doom-emacs/doom-emacs
 #+END_SRC
 
 ** Multihead set-up
@@ -947,12 +960,30 @@ Gtk configuration
 "lxappearance"
 #+END_SRC
 
+Xorg helper
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"xprop"
+#+END_SRC
+
+Protonvpn
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"protonvpn-cli"
+#+END_SRC
+
+Docker interaction
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"docker-compose"
+#+END_SRC
+
+video player
+#+BEGIN_SRC scheme :tangle manifests/desktop.scm
+"mpv"
+#+END_SRC
+
 *** Footer
 #+BEGIN_SRC scheme :tangle manifests/desktop.scm
 ))
 #+END_SRC
-
-
 
 ** Emacs
 *** Header
@@ -965,7 +996,8 @@ Gtk configuration
 Emacs distribution
 #+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
 ;;"emacs-native-comp"
-"emacs-next-pgtk"
+;;"emacs-next-pgtk"
+"emacs"
 #+END_SRC
 
 Tools for straight.el
@@ -987,11 +1019,15 @@ Pass
 "password-store"
 #+END_SRC
 
+Jupyter
+#+BEGIN_SRC scheme :tangle manifests/emacs.scm
+"jupyter"
+#+END_SRC
+
 *** Footer
 #+BEGIN_SRC scheme :tangle manifests/emacs.scm :noweb yes
 ))
 #+END_SRC
-
 
 ** R
 *** Header
@@ -1016,6 +1052,11 @@ C Library
 "libxml2"
 #+END_SRC
 
+Java
+#+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
+"openjdk"
+#+END_SRC
+
 R Library
 #+BEGIN_SRC scheme :tangle manifests/R.scm :noweb yes
 "r-here"
@@ -1029,6 +1070,7 @@ R Library
 "r-purrr"
 "r-furrr"
 "r-rjson"
+"r-profvis"
 #+END_SRC
 
 *** Footer
@@ -1064,8 +1106,7 @@ Dependencies
 ))
 #+END_SRC
 
-
-** Neovim (doesn't work... c library not up-to-date, neorg failed)
+** Neovim
 *** Header
 #+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
 (specifications->manifest
@@ -1078,20 +1119,34 @@ Neovim distribution
 "neovim"
 #+END_SRC
 
-General
+Python
 #+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
+"curl"
+"python"
+#+END_SRC
+
+Tree-sitter
+#+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
+"gcc-toolchain"
+"git"
 "node"
 #+END_SRC
 
-Syntax highlighter
+Telescope
 #+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
-"tree-sitter"
+"ripgrep"
+"fd"
 #+END_SRC
 
-LSP
+
+Vimtex support
 #+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes
-"rust-cargo"
+"zathura"
+"zathura-pdf-poppler"
+"xdotool"
+"biber"
 #+END_SRC
+
 
 *** Footer
 #+BEGIN_SRC scheme :tangle manifests/neovim.scm :noweb yes

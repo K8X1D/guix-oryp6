@@ -2,8 +2,13 @@
  '(
    ;;"emacs-next-pgtk"
    ;;"emacs-pgtk-native-comp"
-   "emacs-native-comp"
+   ;;"emacs-native-comp"
+   "emacs"
 
+   ;; straight
+   "git"
+
+   ;; fonts
    "font-juliamono"
    "font-dejavu"
    "font-hack"
@@ -13,6 +18,7 @@
    "font-iosevka"
    "font-overpass"
 
+   ;; org-roam viz
    "graphviz"
 
    ;; vterm
@@ -37,5 +43,19 @@
    ;; python
    "python-isort"
    "python-nose"
+   "python-pytest"
+
+   ;; jupyter
+   "jupyter"
+   "r-irkernel"
+
+   ;; lisp
+   "sbcl"
+
+   ;;nix
+   "nixfmt"
+
+   ;;
+   "scrot"
 
    ))

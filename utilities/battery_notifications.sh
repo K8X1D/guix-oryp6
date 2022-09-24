@@ -7,9 +7,9 @@ do
    battery_level=`acpi -b | grep -P -o '[0-9]+(?=%)'`
    battery_charging=`acpi -b | grep -c 'Charging'`
    if [ $battery_level -le $warning_level ] && [ $battery_level -gt $critic_level ] && [ $battery_charging -eq "0" ]; then
-       dunstify "Battery getting low..." "$battery_level% left"    
+       dunstify "Battery getting low..." "$battery_level% left"
    elif [ $battery_level -le $critic_level ] && [ $battery_charging -eq "0" ]; then
-       dunstify "Critically low battery level..." "$battery_level% left"    
+       dunstify "Critically low battery level..." "$battery_level% left"
    fi
     sleep 300 # 300 seconds or 5 minutes
 done

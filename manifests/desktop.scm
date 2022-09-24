@@ -21,4 +21,12 @@
 
 "lxappearance"
 
+"xprop"
+
+"protonvpn-cli"
+
+"docker-compose"
+
+"mpv"
+
 ))

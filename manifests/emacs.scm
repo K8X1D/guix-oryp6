@@ -2,7 +2,8 @@
  '(
 
 ;;"emacs-native-comp"
-"emacs-next-pgtk"
+;;"emacs-next-pgtk"
+"emacs"
 
 "git"
 
@@ -13,5 +14,7 @@
 "perl"
 
 "password-store"
+
+"jupyter"
 
 ))

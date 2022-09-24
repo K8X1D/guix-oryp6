@@ -175,11 +175,14 @@
                      "nvidia_drm.modeset=1"
                      "nvidia.NVreg_DynamicPowerManagement=0x02"
                      "modprobe.blacklist=nouveau"
+                     "modprobe.blacklist=i2c_nvidia_gpu"
                      ;; Fix audio problem: headphone hissing on right ear; cost: loose microphone for headphone
                      ;;"snd_hda_intel.model=clevo-p950"
                      ;;"snd-hda-intel.power-save=0"
                      ;;"snd_hda_intel.power_save=0"
-                     "nmi_watchdog=0"))
+                     ;; hibernate to swap
+                    "resume=/dev/sda2"
+                    "nmi_watchdog=0"))
   (initrd microcode-initrd)
   (initrd-modules %base-initrd-modules)
   (firmware (list linux-firmware))
@@ -206,35 +209,40 @@
                             ))
              ))
 
-  ;; Assume the target root file system is labelled "my-root",
-  ;; and the EFI System Partition has UUID 1234-ABCD.
-  (file-systems (append
-                 (list (file-system
-                        (device (uuid "e896af2f-15f1-4503-9564-975e93e79f40" 'ext4))
-                        (mount-point "/")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "e45224c0-20bd-4ba8-880d-2bb84827dce7" 'ext4))
-                        (mount-point "/home")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "7eb6c440-b26d-48d9-b8e9-bce47a46dfa1" 'ext4))
-                        (mount-point "/shared")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "d3900119-e611-4e5a-887c-cd1dbf3711b4" 'ext4))
-                        (mount-point "/extension")
-                        (type "ext4"))
-                       (file-system
-                        (device (uuid "0554-6F13" 'fat))
-                        (mount-point "/boot/efi")
-                        (type "vfat")))
-                 %base-file-systems))
+(file-systems (append
+               (list
+                ;; boot
+                (file-system
+                 (device (uuid "0554-6F13" 'fat))
+                 (mount-point "/boot/efi")
+                 (type "vfat"))
+                ;; root
+                (file-system
+                 (device (uuid "e896af2f-15f1-4503-9564-975e93e79f40" 'ext4))
+                 (mount-point "/")
+                 (type "ext4"))
+                ;; home
+                (file-system
+                 (device (uuid "e45224c0-20bd-4ba8-880d-2bb84827dce7" 'ext4))
+                 (mount-point "/home")
+                 (type "ext4"))
+                ;; shared volume
+                (file-system
+                 (device (uuid "7eb6c440-b26d-48d9-b8e9-bce47a46dfa1" 'ext4))
+                 (mount-point "/shared")
+                 (type "ext4"))
+                ;; second harddrive
+                (file-system
+                 (device (uuid "d3900119-e611-4e5a-887c-cd1dbf3711b4" 'ext4))
+                 (mount-point "/extension")
+                 (type "ext4"))
+                )
+               %base-file-systems))
 
   (swap-devices (list
                  (swap-space
                   (target
-                   (uuid "6e1c9e15-4904-4d63-877d-2001773ec067"))))) ;; test
+                   (uuid "01278a0f-360c-47be-a63d-31376dab09d4")))))
 
       (users (cons (user-account
                     (name "k8x1d")
@@ -271,6 +279,7 @@
                      rofi ;;launcher
                      brightnessctl ;; brightness
                      dunst ;; notifications
+                     xclip ;; clipboard
 
                      ;; sway set-up
                      sway swayidle swaybg waybar bemenu swaylock-effects foot libnotify fnott
@@ -382,16 +391,16 @@
 ;;         (sddm-configuration
 ;;          (xorg-configuration my-xorg-conf)))
 (service sddm-service-type
-(sddm-configuration
-(themes-directory "/shared/Documents/Logiciels/guix_set-up/sddm/themes")
-(theme "sugar-dark")
+         (sddm-configuration
+          (themes-directory "/shared/Documents/Logiciels/guix_set-up/sddm/themes")
+          (theme "sugar-dark")
             ;;;;(sddm (fixpkg sddm)) ;; seem to cause black screen
             ;;;;(xdisplay-start "/home/k8x1d/start-up")
             ;;;;(xsession-command "/shared/Projects/Logiciels/.xinitrc") ;; test
             ;;;;(xsession-command picom)
-            (sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
-;;(xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
-(xorg-configuration my-xorg-conf)))
+          (sessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/wayland-sessions")
+          (xsessions-directory "/shared/Documents/Logiciels/guix_set-up/sddm/x-sessions")
+          (xorg-configuration my-xorg-conf)))
 
 ;;(service lightdm-service-type (lightdm-configuration
 ;;                               (xorg-configuration my-xorg-conf)))
