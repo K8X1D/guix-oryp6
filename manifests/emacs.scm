@@ -1,9 +1,7 @@
 (specifications->manifest
  '(
 
-;;"emacs-native-comp"
-;;"emacs-next-pgtk"
-"emacs"
+"emacs-next-pgtk"
 
 "git"
 
@@ -12,9 +10,5 @@
 "gcc-toolchain"
 "libtool"
 "perl"
-
-"password-store"
-
-"jupyter"
 
 ))

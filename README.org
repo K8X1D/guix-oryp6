@@ -17,7 +17,7 @@ This guix configuration aims the gives basis set-up for a System76 Oryx Pro lapt
   See [[https://tech-docs.system76.com/models/oryp6/README.html][technical manual]] for more information.
 
 *** What is working ?
-- nvidia dynamic powermanagement
+- nvidia dynamic power management
 - gpu  hdmi
 
 *** What is not working ?
