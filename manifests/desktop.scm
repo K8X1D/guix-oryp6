@@ -11,4 +11,5 @@
    "dunst" ;; notifications
    "pavucontrol" ;; pulseaudio gui
    "bluez" ;; Bluetooth interaction
+   "unzip" ;; uncompress zip files
    ))

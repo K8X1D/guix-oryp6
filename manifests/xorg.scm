@@ -18,7 +18,7 @@
    "polybar" ;; bar
 
    ;; dwm
-   "slock" ;; lockscreen
+   ;;"slock" ;; lockscreen
    "libx11"
    "libxft"
    ))

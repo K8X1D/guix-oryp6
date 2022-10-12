@@ -1,11 +1,15 @@
 (specifications->manifest
  '(
+   ;; distribution
    "r"
+   ;; IDE
+   "rstudio"
 
+   ;; External libraries
    "libxml2" ;; xml c library
    "openjdk" ;; java
 
-   ;; Libraries
+   ;; R libraries
    "r-here"
    "r-languageserver"
    "r-tibble"
