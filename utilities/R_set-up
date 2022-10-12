@@ -1,4 +1,0 @@
-#!/bin/sh
-GUIX_EXTRA_PROFILES=$HOME/.guix-extra-profiles
-mkdir -p "$GUIX_EXTRA_PROFILES"/R # if it does not exist yet
-guix package --substitute-urls="https://substitutes.guix.psychnotebook.org https://substitutes.nonguix.org https://ci.guix.gnu.org" --manifest=$HOME/.config/guix/manifests/R.scm --profile="$GUIX_EXTRA_PROFILES"/R/R
