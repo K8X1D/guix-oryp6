@@ -10,6 +10,7 @@
  linux ;; module-loader
  file-sharing ;; transmission
  xorg ;; xorg-configuration
+ nix ;; nix
  docker ;; docker
  networking ;; network-manager
  cups ;; cups
@@ -24,6 +25,7 @@
  databases ;; postgresql
  fonts ;; dejavu, juliamono, freefont
  gnome ;; network-manager-openvpn
+ package-management ;; nix
  wm ;; 13
  suckless ;; dmenu
  xorg ;; xterm
@@ -187,11 +189,14 @@
 	      (menu-entries (list
 			     (menu-entry
 			      (label "Arch Linux")
-			      (linux "/boot/efi/vmlinuz-linux")
-			      (linux-arguments '("root=UUID=15785f4a-599f-4a9b-a608-376de117c4f3 rw"
-						 "nowatchdog"
-						 "resume=UUID=29a96c1b-45e3-4c80-be79-12cc266f4edd"))
-			      (initrd "/boot/efi/initramfs-linux.img"))
+			      (linux "/boot/vmlinuz-linux")
+			      (linux-arguments '("root=/dev/nvme1n1p3"))
+			      (initrd "/boot/initramfs-linux.img"))
+			     ;; (linux-arguments '("root=/dev/nvme1n1p3"
+			     ;;			 "rw"
+			     ;;			 "nowatchdog"
+			     ;;			 "resume=UUID=29a96c1b-45e3-4c80-be79-12cc266f4edd"))
+			     ;; (initrd "/boot/initramfs-linux.img"))
 			     ))
 	      ))
 
@@ -240,7 +245,7 @@
 
  (packages (append (list
 		    ;; window managers
-		    i3-gaps i3status dmenu
+		    i3-gaps i3status dmenu slock
 		    ;; terminal emulator
 		    xterm
 
@@ -253,7 +258,8 @@
 		    ;; Fonts
 		    font-dejavu font-juliamono font-gnu-freefont
 		    ;; Extra packages
-		    ;;nix flatpak
+		    nix
+		    ;;flatpak
 		    ;; Drivers
 		    nvidia-driver
 		    ;; nvidia-module
@@ -270,6 +276,12 @@
 	    (service kernel-module-loader-service-type
 		     '("nvidia"
 		       "nvidia_modeset"))
+	    ;; Nix
+	    (service nix-service-type)
+	    ;; PAM
+	    (screen-locker-service slock "slock")
+	    ;;(screen-locker-service i3lock-color "i3lock")
+	    ;;(screen-locker-service swaylock-effects "swaylock")
 	    ;; Databases 
 	    (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
 	    (service postgresql-service-type
@@ -293,7 +305,15 @@
 		       (list (mpd-output
 			      (name "pulse audio")
 			      (type "pulse"))))
-		      (user "k8x1d")))
+		      (user "k8x1d")
+		      (music-dir "~/Music")
+		      (playlist-dir "~/.config/mpd/playlists")
+		      (db-file "~/.config/mpd/database")
+		      (state-file "~/.config/mpd/state")
+		      (sticker-file "~/.config/mpd/sticker.sql")
+		      (port "6600")
+		      (address "any")
+		      ))
 	    ;; Torrents
 	    (service transmission-daemon-service-type
 		     (transmission-daemon-configuration
@@ -305,18 +325,14 @@
 	    ;; Power management
 	    (service tlp-service-type)
 	    (service thermald-service-type)
-	    ;; PAM
-	    (screen-locker-service slock)
-	    (screen-locker-service i3lock-color "i3lock")
-	    (screen-locker-service swaylock-effects "swaylock")
 	    ;; Login manager
 	    (service sddm-service-type
-	             (sddm-configuration
-	              (themes-directory "/extension/Work/Documents/Softwares/Guix/sddm/themes")
-	              (theme "sugar-dark")
-	              (sessions-directory "/extension/Work/Documents/Softwares/Guix/sddm/wayland-sessions")
-	              (xsessions-directory "/extension/Work/Documents/Softwares/Guix/sddm/x-sessions")
-	              (xorg-configuration my-xorg-conf)))
+		     (sddm-configuration
+		      (themes-directory "/extension/Work/Documents/Softwares/Guix/sddm/themes")
+		      (theme "sugar-dark")
+		      (sessions-directory "/extension/Work/Documents/Softwares/Guix/sddm/wayland-sessions")
+		      (xsessions-directory "/extension/Work/Documents/Softwares/Guix/sddm/x-sessions")
+		      (xorg-configuration my-xorg-conf)))
 	    ;;(service slim-service-type (slim-configuration
 	    ;;				(display ":0")
 	    ;;				(vt "vt7")
