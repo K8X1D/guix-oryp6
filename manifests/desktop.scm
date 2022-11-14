@@ -6,7 +6,6 @@
    "signal-desktop" ;; signal application
    ;;"lxappearance" ;; destop theme control
    "brightnessctl" ;; brightness control
-   "dunst" ;; notifications
    "bluez" ;; Bluetooth interaction
    "unzip" ;; uncompress zip files
    "android-file-transfer" ;; transfert file to android phone
