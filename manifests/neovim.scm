@@ -1,0 +1,13 @@
+(specifications->manifest
+ '(
+   "neovim"
+   "git"
+   "gcc-toolchain"
+   ;;"tree-sitter"
+   "node"
+   "ripgrep"
+   "fd"
+   "curl"
+   "llvm"
+   "clang-toolchain"
+   ))
