@@ -1,4 +1,5 @@
 (use-modules (gnu)
+	     (gnu system setuid)
 	     (nongnu packages linux)
 	     (nongnu system linux-initrd)
 	     (nongnu packages nvidia)
@@ -18,18 +19,23 @@
  databases ;; postgresql
  pm ;; tlp, thermald
  sddm ;;sddm
+ shepherd ;;shepherd
  )
 
 (use-package-modules
  certs ;; nss-certs
  databases ;; postgresql
  fonts ;; dejavu, juliamono, freefont
+ haskell ;; ghc
  gnome ;; network-manager-openvpn
  package-management ;; nix
  wm ;; 13
+ emacs ;; emacs
+ emacs-xyz ;; emacs-desktop
  suckless ;; dmenu
  xorg ;; xterm
- linux ;; acpi 
+ linux ;; acpi
+ terminals ;; foot
  )
 
 (define nvidia-dgpu.conf
@@ -113,7 +119,7 @@
 						 (substitute-urls
 						  (append (list "https://substitutes.nonguix.org" ;; nonguix
 								;;"https://guix.bordeaux.inria.fr" ;; hpc
-								;;"https://substitutes.guix.psychnotebook.org" ;; guix-science ;; broke often...
+								"https://substitutes.guix.psychnotebook.org" ;; guix-science ;; broke often...
 								)
 							  ;;(append (list "https://substitutes.nonguix.org")
 							  %default-substitute-urls))
@@ -142,7 +148,8 @@
 									 (curve Ed25519)
 									 (q #89FBA276A976A8DE2A69774771A92C8C879E0F24614AAAAE23119608707B3F06#)
 								       )
-								     )"))
+								     )")
+							   )
 							  %default-authorized-guix-keys))))
 		   (network-manager-service-type config =>
 						 (network-manager-configuration (inherit config)
@@ -177,6 +184,8 @@
 		    "nmi_watchdog=0"))
  (initrd microcode-initrd)
  (initrd-modules %base-initrd-modules)
+ ;; test for resume... dont't work
+ ;;(initrd-modules (cons "udev" %base-initrd-modules))
  (firmware (list linux-firmware))
 
  ;; Use the UEFI variant of GRUB with the EFI System
@@ -185,18 +194,16 @@
 	      (bootloader grub-efi-bootloader)
 	      (targets '("/boot/efi"))
 	      (timeout 2)
-	      (keyboard-layout my-keyboard-layout)
+	      (theme (grub-theme
+		      (inherit (grub-theme))
+		      (gfxmode '("1920x1200x32"))))
+ (keyboard-layout my-keyboard-layout)
 	      (menu-entries (list
 			     (menu-entry
-			      (label "Arch Linux")
-			      (linux "/boot/vmlinuz-linux")
-			      (linux-arguments '("root=/dev/nvme1n1p3"))
-			      (initrd "/boot/initramfs-linux.img"))
-			     ;; (linux-arguments '("root=/dev/nvme1n1p3"
-			     ;;			 "rw"
-			     ;;			 "nowatchdog"
-			     ;;			 "resume=UUID=29a96c1b-45e3-4c80-be79-12cc266f4edd"))
-			     ;; (initrd "/boot/initramfs-linux.img"))
+			      (label "Pop!_OS")
+			      (linux "/boot/vmlinuz-6.0.3-76060003-generic")
+			      (linux-arguments '("root=UUID=0f917ad5-cdb3-481e-b811-05b4d970252f" "quiet" "loglevel=0" "systemd.show_status=false" "splash"))
+			      (initrd "/boot/initrd.img-6.0.3-76060003-generic"))
 			     ))
 	      ))
 
@@ -228,7 +235,7 @@
  (swap-devices (list
 		(swap-space
 		 (target
-		  (uuid "29a96c1b-45e3-4c80-be79-12cc266f4edd")))))
+		  (uuid "8a0f4759-c5c3-4f7a-bf3b-08ebcd1b8449")))))
 
  (users (cons (user-account
 	       (name "k8x1d")
@@ -246,10 +253,14 @@
  (packages (append (list
 		    ;; window managers
 		    i3-gaps i3status dmenu slock
+                    emacs emacs-exwm emacs-desktop-environment xhost
+		    xmonad-next xmobar ghc-xmonad-contrib-next ghc
 		    ;; terminal emulator
 		    xterm
 
 		    ;; sway set-up
+		    sway swaylock-effects swayidle swaybg foot grimshot
+
 		    ;; utilities
 		    acpi
 
@@ -271,7 +282,7 @@
 		   %base-packages))
 
  (services (cons*
-	    ;; Drivers 
+	    ;; Drivers
 	    (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
 	    (service kernel-module-loader-service-type
 		     '("nvidia"
@@ -281,8 +292,8 @@
 	    ;; PAM
 	    (screen-locker-service slock "slock")
 	    ;;(screen-locker-service i3lock-color "i3lock")
-	    ;;(screen-locker-service swaylock-effects "swaylock")
-	    ;; Databases 
+	    (screen-locker-service swaylock-effects "swaylock")
+	    ;; Databases
 	    (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
 	    (service postgresql-service-type
 		     (postgresql-configuration
@@ -323,15 +334,42 @@
 
 	    (bluetooth-service #:auto-enable? #f)
 	    ;; Power management
-	    (service tlp-service-type)
+	    (service tlp-service-type
+		     (tlp-configuration
+		      ;; Dirty pages flushing periodicity
+		      (max-lost-work-secs-on-bat 60)
+		      (max-lost-work-secs-on-ac 60)
+		      ;; CPU frequency scaling governor
+		      (cpu-scaling-governor-on-bat (list "powersave"))
+		      (cpu-scaling-governor-on-ac (list "performance"))
+		      ;; Limit the min/max P-state to control the power dissipation of the CPU
+		      (cpu-min-perf-on-bat 0)
+		      (cpu-max-perf-on-bat 50)
+		      (cpu-min-perf-on-ac 0)
+		      (cpu-max-perf-on-ac 100)
+		      ;; Enable CPU turbo boost
+		      (cpu-boost-on-bat? #f)
+		      (cpu-boost-on-ac? #f)
+		      ;; minimize the number of CPU cores/hyper-threads used under light load conditions.
+		      (sched-powersave-on-bat? #t)
+		      (sched-powersave-on-ac? #t)
+		      ;; NMI watchdog.
+		      (nmi-watchdog? #f)
+		      ;; PCI Express Active State Power Management level
+		      (pcie-aspm-on-bat "powersave")
+		      (pcie-aspm-on-ac "default")
+		      ;; Set CPU performance versus energy saving policy
+		      (energy-perf-policy-on-bat "powersave")
+		      (energy-perf-policy-on-ac "normal")
+		      ))
 	    (service thermald-service-type)
 	    ;; Login manager
 	    (service sddm-service-type
 		     (sddm-configuration
-		      (themes-directory "/extension/Work/Documents/Softwares/Guix/sddm/themes")
+		      (themes-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/themes")
 		      (theme "sugar-dark")
-		      (sessions-directory "/extension/Work/Documents/Softwares/Guix/sddm/wayland-sessions")
-		      (xsessions-directory "/extension/Work/Documents/Softwares/Guix/sddm/x-sessions")
+		      (sessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/wayland-sessions")
+		      (xsessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/x-sessions")
 		      (xorg-configuration my-xorg-conf)))
 	    ;;(service slim-service-type (slim-configuration
 	    ;;				(display ":0")

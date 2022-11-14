@@ -22,4 +22,6 @@
    "r-furrr"
    "r-rjson"
    "r-profvis"
+   "r-data-table"
+   "r-devtools"
    ))

@@ -32,11 +32,12 @@
     (openpgp-fingerprint
      "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
 
- (channel
-  (name 'guix-hpc)
-  (url "https://gitlab.inria.fr/guix-hpc/guix-hpc.git"))
+ ;; (channel
+ ;;  (name 'guix-hpc)
+ ;;  (url "https://gitlab.inria.fr/guix-hpc/guix-hpc.git"))
 
- (channel
-  (name 'guix-hpc-non-free)
-  (url "https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free.git"))
+ ;; (channel
+ ;;  (name 'guix-hpc-non-free)
+ ;;  (url "https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free.git"))
+ ; )
  )

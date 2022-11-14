@@ -2,5 +2,13 @@
  '(
    "python"
    "python-pip"
-   "ffmpeg" ;;yt-dlp
+
+
+   ;; yt-dlp
+   "ffmpeg"
+
+   ;; bin
+   "icecat"
+   "python-pandas"
+   "python-selenium"
    ))
