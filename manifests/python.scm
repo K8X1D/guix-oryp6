@@ -8,7 +8,6 @@
    "ffmpeg"
 
    ;; bin
-   "icecat"
    "python-pandas"
    "python-selenium"
    ))

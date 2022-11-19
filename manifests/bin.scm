@@ -11,8 +11,4 @@
    "python-selenium"
    "python-pandas"
    "python-lxml"
-   "icecat"
-   "firefox"
-
-
    ))

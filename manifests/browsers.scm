@@ -10,7 +10,6 @@
 
    ;; Firefox
    "firefox"
-   "icecat"
 
    ;; Chromium
    "ungoogled-chromium"
