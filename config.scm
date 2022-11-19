@@ -4,6 +4,9 @@
 	     (nongnu system linux-initrd)
 	     (nongnu packages nvidia)
 	     (gnu system nss)
+	     (k8x1d packages k8x1d-dwm)
+	     (k8x1d packages k8x1d-st)
+	     (k8x1d packages k8x1d-slstatus)
 	     (srfi srfi-1))
 
 (use-service-modules
@@ -119,7 +122,7 @@
 						 (substitute-urls
 						  (append (list "https://substitutes.nonguix.org" ;; nonguix
 								;;"https://guix.bordeaux.inria.fr" ;; hpc
-								"https://substitutes.guix.psychnotebook.org" ;; guix-science ;; broke often...
+								;; "https://substitutes.guix.psychnotebook.org" ;; guix-science ;; broke often...
 								)
 							  ;;(append (list "https://substitutes.nonguix.org")
 							  %default-substitute-urls))
@@ -252,9 +255,10 @@
 
  (packages (append (list
 		    ;; window managers
-		    i3-gaps i3status dmenu slock
+		    i3-gaps i3status dmenu
                     emacs emacs-exwm emacs-desktop-environment xhost
 		    xmonad-next xmobar ghc-xmonad-contrib-next ghc
+		    k8x1d-dwm k8x1d-st k8x1d-slstatus slock
 		    ;; terminal emulator
 		    xterm
 
