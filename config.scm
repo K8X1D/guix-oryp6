@@ -4,9 +4,7 @@
 	     (nongnu system linux-initrd)
 	     (nongnu packages nvidia)
 	     (gnu system nss)
-	     (k8x1d packages k8x1d-dwm)
-	     (k8x1d packages k8x1d-st)
-	     (k8x1d packages k8x1d-slstatus)
+	     (k8x1d packages k8x1d-suckless)
 	     (srfi srfi-1))
 
 (use-service-modules
