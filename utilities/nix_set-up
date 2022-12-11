@@ -2,8 +2,15 @@
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
 nix-env -iA \
-    nixpkgs.zotero \
-    nixpkgs.julia-bin \
-    nixpkgs.vscodium
+	nixpkgs.zotero \
+	nixpkgs.protonmail-bridge \
+	nixpkgs.caprine \
+	nixpkgs.julia-bin \
+	nixpkgs.vscodium \
+	nixpkgs.calibre \
+	nixpkgs.neovim \
+	nixpkgs.texlab \
+	nixpkgs.tree-sitter \
+	nixpkgs.zathura
 
 ln -s /nix/var/nix/profiles/per-user/k8x1d/profile ~/.nix-profile
