@@ -24,4 +24,5 @@
    "r-profvis"
    "r-data-table"
    "r-devtools"
+   "r-pdftools"
    ))
