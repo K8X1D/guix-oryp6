@@ -13,6 +13,12 @@
    "icedove" ;; GNU thunderbird, email client
    "rsync" ;; backup program
    "p7zip" ;; archiving and compression program
+   "mpv" ;; Audio and video player
+   "xdg-utils" ;; Freedesktop.org scripts for desktop integration
+
+
+   "mpv-mpris" ;; MPRIS plugin for mpv
+
 
    ;; System monitor
    "powertop" ;; energy monitor
