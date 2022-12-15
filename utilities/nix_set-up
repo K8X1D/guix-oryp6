@@ -4,8 +4,10 @@ nix-channel --update
 nix-env -iA \
 	nixpkgs.zotero \
 	nixpkgs.protonmail-bridge \
+	nixpkgs.system76-keyboard-configurator \
+	nixpkgs.mattermost-desktop \
 	nixpkgs.caprine \
-	nixpkgs.julia-bin \
+	nixpkgs.discord \
 	nixpkgs.vscodium \
 	nixpkgs.calibre \
 	nixpkgs.neovim \
