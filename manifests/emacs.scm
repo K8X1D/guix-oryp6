@@ -1,50 +1,58 @@
+;; This "manifest" file can be passed to 'guix package -m' to reproduce
+;; the content of your profile.  This is "symbolic": it only specifies
+;; package names.  To reproduce the exact same profile, you also need to
+;; capture the channels being used, as returned by "guix describe".
+;; See the "Replicating Guix" section in the manual.
+
 (specifications->manifest
- '(
-   ;; emacs distro
-   "emacs"
-   ;;"emacs-next"
-   ;;"emacs-next-pgtk"
-
-   ;; Straight
-   "git"
-
-   ;; doom
-   "ripgrep"
-   "fd"
-
-   ;; vterm
-   "cmake"
-   "make"
-   "gcc-toolchain"
-   "libtool"
-   "perl"
-
-   ;; eglot ltex
-   "openjdk" ;; java
-
-   ;; Taskjuggler
-   "ruby-taskjuggler"
-   
-   "zip" ;; allow export to odt
-   ;;
-   ;;
-   ;;   ;; Python
-   "python-lsp-server"
-   ;;
-   ;;
-   ;; Fonts
-   "font-fira-code"
-   "font-fira-sans"
-
-
-   ;; file explorer
-   ;; https://github.com/alexluigit/dirvish
-   "fd"
-   "imagemagick"
-   "poppler"
-   "ffmpegthumbnailer"
-   "mediainfo"
-   "tar"
-   "unzip"
-
-   ))
+  (list "emacs-forge"
+        "emacs-magit"
+        "emacs-magit-org-todos-el"
+        "emacs-magit-todos"
+        "emacs-org"
+        "emacs-org-superstar"
+        "emacs-toc-org"
+        "emacs-org-roam"
+        "emacs-org-pomodoro"
+        "emacs-org-contrib"
+        "emacs-julia-mode"
+        "emacs-julia-repl"
+        "emacs-vterm"
+        "emacs-vterm-toggle"
+        "emacs-all-the-icons"
+        "emacs-all-the-icons-completion"
+        "emacs-all-the-icons-dired"
+        "emacs-all-the-icons-ibuffer"
+        "emacs"
+        "emacs-guix"
+        "emacs-doom-modeline"
+        "emacs-doom-snippets"
+        "emacs-doom-themes"
+        "emacs-evil"
+        "emacs-evil-collection"
+        "emacs-evil-surround"
+        "emacs-evil-org"
+        "emacs-undo-fu"
+        "emacs-undo-fu-session"
+        "git"
+        "ripgrep"
+        "fd"
+        "cmake"
+        "make"
+        "gcc-toolchain"
+        "libtool"
+        "perl"
+        "openjdk"
+        "ruby-taskjuggler"
+        "zip"
+        "python-lsp-server"
+        "font-fira-code"
+        "font-fira-sans"
+        "font-iosevka-aile"
+        "font-jetbrains-mono"
+        "imagemagick"
+        "poppler"
+        "ffmpegthumbnailer"
+        "mediainfo"
+        "tar"
+        "unzip"))
