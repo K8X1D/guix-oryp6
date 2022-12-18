@@ -46,7 +46,7 @@
  (url "https://gitlab.com/oryp6/guix_set-up/guix-channel.git")
  (introduction
   (make-channel-introduction
-   "adc686dce70f6e49cc1fb2efae902ad58df78367"
+   "980b2edf05cf3cb77c9ac71f78a6bbe2a78c3e99"
    (openpgp-fingerprint
     "A180 8C8D E727 2D87 15CD  AB96 39AA 7B97 9BCC 55C5"))))
 
