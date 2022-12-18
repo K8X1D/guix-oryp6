@@ -1,28 +1,39 @@
+;; Imports ;;;;
+;; Import guix modules
 (use-modules (gnu)
 	     (gnu system setuid)
-	     (nongnu packages linux)
-	     (nongnu system linux-initrd)
-	     (nongnu packages nvidia)
 	     (gnu system nss)
-	     (k8x1d packages k8x1d-suckless)
+	     (guix transformations)
 	     (srfi srfi-1))
 
+;; Import nonfree linux module.
+(use-modules (nongnu packages linux)
+             (nongnu system linux-initrd)
+	     (nongnu packages nvidia)
+	     (nongnu services nvidia))
+
+;; Import personal modules
+(use-modules (k8x1d packages k8x1d-suckless))
+
+;; Uses ;;;;
+;; Services modules
 (use-service-modules
- desktop ;; desktop
- linux ;; module-loader
+ desktop      ;; desktop
+ linux	      ;; module-loader
  file-sharing ;; transmission
- xorg ;; xorg-configuration
- nix ;; nix
- docker ;; docker
- networking ;; network-manager
- cups ;; cups
- audio ;; mpd
- databases ;; postgresql
- pm ;; tlp, thermald
- sddm ;;sddm
- shepherd ;;shepherd
+ xorg	      ;; xorg-configuration
+ nix	      ;; nix
+ docker	      ;; docker
+ networking   ;; network-manager
+ cups	      ;; cups
+ audio	      ;; mpd
+ databases    ;; postgresql
+ pm	      ;; tlp, thermald
+ sddm	      ;;sddm
+ shepherd     ;;shepherd
  )
 
+;; Packages modules
 (use-package-modules
  certs ;; nss-certs
  databases ;; postgresql
@@ -71,13 +82,19 @@
   (keyboard-layout "ca" "fr"
 		   #:options '("ctrl:nocaps" "altwin:menu_win")))
 
+
+;; Libglx support, see https://wiki.systemcrafters.cc/guix/nvidia/
+(define transform
+  (options->transformation
+   '((with-graft . "mesa=nvda"))))
+
+
 (define my-xorg-conf
   (xorg-configuration
    (keyboard-layout my-keyboard-layout)
    (modules
     (cons*
      nvidia-driver
-     ;;     nvidia-module
      (remove
       (lambda (pkg)
 	(member pkg
@@ -91,6 +108,7 @@
 		 xf86-video-nv
 		 xf86-video-sis)))
       %default-xorg-modules)))
+   ;;(server (transform xorg-server)) ;; hdmi dgpu stop working if in effect
    (extra-config (list nvidia-dgpu.conf))
    (drivers '("modesetting" "nvidia"))))
 
@@ -167,22 +185,25 @@
  (locale "en_US.utf8")
  (keyboard-layout my-keyboard-layout)
 
- (kernel linux-lts)
- (kernel-loadable-modules (list nvidia-driver))
- ;;(kernel-loadable-modules (list nvidia-module))
- (kernel-arguments (list
-		    ;; Nvidia set-up
-		    "nvidia_drm.modeset=1"
-		    "nvidia.NVreg_DynamicPowerManagement=0x02"
-		    "modprobe.blacklist=nouveau"
-		    "modprobe.blacklist=i2c_nvidia_gpu"
-		    ;; Fix audio problem: headphone hissing on right ear; cost: loose microphone for headphone
-		    ;;"snd_hda_intel.model=clevo-p950"
-		    ;;"snd-hda-intel.power-save=0"
-		    ;;"snd_hda_intel.power_save=0"
-		    ;; hibernate to swap
-		    "resume=/dev/sda2"
-		    "nmi_watchdog=0"))
+ ;;(kernel linux-lts)
+ (kernel linux)
+ (kernel-arguments (append
+		    '(
+ 		    ;; Nvidia set-up
+ 		    "nvidia_drm.modeset=1"
+ 		    "nvidia.NVreg_DynamicPowerManagement=0x02"
+ 		    "modprobe.blacklist=nouveau"
+ 		    "modprobe.blacklist=i2c_nvidia_gpu"
+		    "modprobe.blacklist=pcspkr" ;; "stop Error: Driver 'pcspkr' is already registered, aborting..." message
+ 		    ;; Fix audio problem: headphone hissing on right ear; cost: loose microphone for headphone
+ 		    ;;"snd_hda_intel.model=clevo-p950"
+ 		    ;;"snd-hda-intel.power-save=0"
+ 		    ;;"snd_hda_intel.power_save=0"
+ 		    ;; hibernate to swap
+ 		    "resume=/dev/sda2"
+ 		    "nmi_watchdog=0")
+		           %default-kernel-arguments))
+ (kernel-loadable-modules (list nvidia-module))
  (initrd microcode-initrd)
  (initrd-modules %base-initrd-modules)
  ;; test for resume... dont't work
@@ -254,7 +275,7 @@
  (packages (append (list
 		    ;; window managers
 		    i3-gaps i3status dmenu
-                    emacs emacs-exwm emacs-desktop-environment xhost
+                    emacs-next emacs-exwm emacs-desktop-environment xhost
 		    xmonad-next xmobar ghc-xmonad-contrib-next ghc
 		    k8x1d-dwm k8x1d-st k8x1d-slstatus slock
 		    ;; terminal emulator
@@ -275,7 +296,6 @@
 		    ;;flatpak
 		    ;; Drivers
 		    nvidia-driver
-		    ;; nvidia-module
 		    nvidia-libs
 		    ;; For user mounts
 		    gvfs
@@ -284,11 +304,8 @@
 		   %base-packages))
 
  (services (cons*
-	    ;; Drivers
-	    (simple-service 'custom-udev-rules udev-service-type (list nvidia-driver))
-	    (service kernel-module-loader-service-type
-		     '("nvidia"
-		       "nvidia_modeset"))
+	    ;; ;; Nvidia
+	    (service nvidia-service-type)
 	    ;; Nix
 	    (service nix-service-type)
 	    ;; PAM
@@ -296,7 +313,7 @@
 	    ;;(screen-locker-service i3lock-color "i3lock")
 	    (screen-locker-service swaylock-effects "swaylock")
 	    ;; Databases
-	    (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root
+	    (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root, TODO building problems, removed tmp
 	    (service postgresql-service-type
 		     (postgresql-configuration
 		      (data-directory "/extension/Data/postgres/data")
@@ -366,20 +383,21 @@
 		      ))
 	    (service thermald-service-type)
 	    ;; Login manager
-	    (service sddm-service-type
-		     (sddm-configuration
-		      (themes-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/themes")
-		      (theme "sugar-dark")
-		      (sessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/wayland-sessions")
-		      (xsessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/x-sessions")
-		      (xorg-configuration my-xorg-conf)))
-	    ;;(service slim-service-type (slim-configuration
-	    ;;				(display ":0")
-	    ;;				(vt "vt7")
-	    ;;				(default-user "k8x1d")
-	    ;;				(xorg-configuration my-xorg-conf)))
-	    ;; Others desktops utilities
-	    %my-desktop-services
-	    ))
+	    ;; (service sddm-service-type
+	    ;; 	     (sddm-configuration
+	    ;; 	      (themes-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/themes")
+	    ;; 	      (theme "sugar-dark")
+	    ;; 	      (sessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/wayland-sessions")
+	    ;; 	      (xsessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/x-sessions")
+	    ;; 	      (xorg-configuration my-xorg-conf)))
+	      (service slim-service-type (slim-configuration
+	     				(display ":0")
+	     				(vt "vt7")
+					(gnupg? #t)
+					(default-user "k8x1d")
+					(xorg-configuration my-xorg-conf)))
+	      ;; ;; Others desktops utilities
+	      (service gnome-keyring-service-type)
+	    %my-desktop-services))
  ;; Allow resolution of '.local' host names with mDNS.
  (name-service-switch %mdns-host-lookup-nss))
