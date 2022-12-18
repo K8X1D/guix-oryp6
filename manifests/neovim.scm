@@ -1,13 +1,14 @@
 (specifications->manifest
  '(
-   "neovim"
-   "git"
-   "gcc-toolchain"
-   ;;"tree-sitter"
-   "node"
-   "ripgrep"
-   "fd"
-   "curl"
-   "llvm"
-   "clang-toolchain"
+  ;; "neovim"
+  ;; "git"
+  ;; "make"
+  ;; "python"
+  ;; "python-pip"
+  ;; "node"
+  ;; "curl"
+
+  ;; ;; vimtex support
+  ;; "xdotool"
+  ;; "biber"
    ))
