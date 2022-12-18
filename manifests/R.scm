@@ -3,7 +3,7 @@
    ;; distribution
    "r"
    ;; IDE
-   "rstudio"
+   ;;"rstudio"
 
    ;; External libraries
    "libxml2" ;; xml c library
@@ -25,4 +25,9 @@
    "r-data-table"
    "r-devtools"
    "r-pdftools"
+   ;; dependencies for robustrao packages
+   "gmp"
+   "r-gmp"
+   "r-quadprog"
+   "r-igraph"
    ))
