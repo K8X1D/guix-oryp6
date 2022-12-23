@@ -4,7 +4,7 @@
    "gimp" ;; image manipulation
    "libreoffice" ;; office suite
    "signal-desktop" ;; signal application
-   ;;"lxappearance" ;; destop theme control
+   "lxappearance" ;; destop theme control
    "brightnessctl" ;; brightness control
    "bluez" ;; Bluetooth interaction
    "unzip" ;; uncompress zip files
@@ -16,6 +16,7 @@
    "mpv" ;; Audio and video player
    "xdg-utils" ;; Freedesktop.org scripts for desktop integration
 
+   "picom" ;; Compositor for X11
 
    "mpv-mpris" ;; MPRIS plugin for mpv
 
@@ -46,5 +47,10 @@
    ;; dependencies for https://github.com/Fausto-Korpsvart/Gruvbox-GTK-Theme
    "murrine"
    "gnome-themes-extra"
+
+   ;; Archives
+   "tar"
+   "unzip"
+   "zip"
 
    ))
