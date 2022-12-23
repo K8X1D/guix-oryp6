@@ -5,9 +5,6 @@ nix-env -iA \
 	nixpkgs.zotero \
 	nixpkgs.protonmail-bridge \
 	nixpkgs.system76-keyboard-configurator \
-	nixpkgs.mattermost-desktop \
-	nixpkgs.caprine \
-	nixpkgs.discord \
 	nixpkgs.vscodium \
 	nixpkgs.calibre \
 	nixpkgs.neovim \
