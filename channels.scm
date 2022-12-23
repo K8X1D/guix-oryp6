@@ -46,8 +46,16 @@
  (url "https://gitlab.com/oryp6/guix_set-up/guix-channel.git")
  (introduction
   (make-channel-introduction
-   "980b2edf05cf3cb77c9ac71f78a6bbe2a78c3e99"
+   "1f836893d03174d1d6a247a37cb8b54b5057cb5e"
    (openpgp-fingerprint
     "A180 8C8D E727 2D87 15CD  AB96 39AA 7B97 9BCC 55C5"))))
+(channel
+  (name 'emacs)
+  (url "https://github.com/babariviere/guix-emacs")
+  (introduction
+   (make-channel-introduction
+    "72ca4ef5b572fea10a4589c37264fa35d4564783"
+    (openpgp-fingerprint
+     "261C A284 3452 FB01 F6DF  6CF4 F9B7 864F 2AB4 6F18"))))
 
  )
