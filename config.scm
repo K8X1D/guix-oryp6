@@ -42,8 +42,8 @@
  gnome ;; network-manager-openvpn
  package-management ;; nix
  wm ;; 13
- emacs ;; emacs
- emacs-xyz ;; emacs-desktop
+;; emacs ;; emacs
+;; emacs-xyz ;; emacs-desktop
  suckless ;; dmenu
  xorg ;; xterm
  linux ;; acpi
@@ -138,7 +138,7 @@
 						 (substitute-urls
 						  (append (list "https://substitutes.nonguix.org" ;; nonguix
 								;;"https://guix.bordeaux.inria.fr" ;; hpc
-								;; "https://substitutes.guix.psychnotebook.org" ;; guix-science ;; broke often...
+								 "https://substitutes.guix.psychnotebook.org" ;; guix-science ;; broke often...
 								)
 							  ;;(append (list "https://substitutes.nonguix.org")
 							  %default-substitute-urls))
@@ -275,7 +275,7 @@
  (packages (append (list
 		    ;; window managers
 		    i3-gaps i3status dmenu
-                    emacs-next emacs-exwm emacs-desktop-environment xhost
+                    ;;emacs-next emacs-exwm emacs-desktop-environment xhost
 		    xmonad-next xmobar ghc-xmonad-contrib-next ghc
 		    k8x1d-dwm k8x1d-st k8x1d-slstatus slock
 		    ;; terminal emulator
@@ -290,7 +290,18 @@
 		    ;; Power management
 		    tlp
 		    ;; Fonts
-		    font-dejavu font-juliamono font-gnu-freefont
+		    font-dejavu
+		    font-juliamono
+		    font-gnu-freefont
+		    font-fira-code
+		    font-fira-sans
+		    font-fira-mono
+		    font-iosevka
+		    font-iosevka-aile
+		    font-iosevka-term
+		    font-jetbrains-mono
+		    font-hack
+
 		    ;; Extra packages
 		    nix
 		    ;;flatpak
@@ -383,21 +394,21 @@
 		      ))
 	    (service thermald-service-type)
 	    ;; Login manager
-	    ;; (service sddm-service-type
-	    ;; 	     (sddm-configuration
-	    ;; 	      (themes-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/themes")
-	    ;; 	      (theme "sugar-dark")
-	    ;; 	      (sessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/wayland-sessions")
-	    ;; 	      (xsessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/x-sessions")
-	    ;; 	      (xorg-configuration my-xorg-conf)))
-	      (service slim-service-type (slim-configuration
-	     				(display ":0")
-	     				(vt "vt7")
-					(gnupg? #t)
-					(default-user "k8x1d")
-					(xorg-configuration my-xorg-conf)))
-	      ;; ;; Others desktops utilities
-	      (service gnome-keyring-service-type)
+	     (service sddm-service-type
+	     	     (sddm-configuration
+	     	      (themes-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/themes")
+	     	      (theme "sugar-dark")
+	     	      (sessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/wayland-sessions")
+	     	      (xsessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/x-sessions")
+	     	      (xorg-configuration my-xorg-conf)))
+	      ;; (service slim-service-type (slim-configuration
+	      ;; 				(display ":0")
+	      ;; 				(vt "vt7")
+	      ;; 				(gnupg? #t)
+	      ;; 				(default-user "k8x1d")
+	      ;; 				(xorg-configuration my-xorg-conf)))
+	      ;; ;; ;; Others desktops utilities
+	      ;;(service gnome-keyring-service-type)
 	    %my-desktop-services))
  ;; Allow resolution of '.local' host names with mDNS.
  (name-service-switch %mdns-host-lookup-nss))
