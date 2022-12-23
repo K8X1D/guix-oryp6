@@ -1,0 +1,5 @@
+(specifications->manifest
+ '(
+   ;; IDE
+   "rstudio"
+   ))
