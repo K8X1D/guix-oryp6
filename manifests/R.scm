@@ -1,9 +1,7 @@
 (specifications->manifest
  '(
    ;; distribution
-   "r"
-   ;; IDE
-   ;;"rstudio"
+   "r-minimal"
 
    ;; External libraries
    "libxml2" ;; xml c library
@@ -12,6 +10,7 @@
    ;; R libraries
    "r-here"
    "r-languageserver"
+   "r-lintr"
    "r-tibble"
    "r-future"
    "r-readr"
