@@ -1,0 +1,5 @@
+#!/bin/sh
+
+pip install --user \
+    	    taguette \
+	    yt-dlp

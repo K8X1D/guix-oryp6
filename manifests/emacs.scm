@@ -5,7 +5,9 @@
 ;; See the "Replicating Guix" section in the manual.
 
 (specifications->manifest
-  (list "emacs-pgtk-native-comp"
+  (list ;;"emacs-pgtk-native-comp"
+        "emacs-next-pgtk"
+        ;;"emacs"
         "git"
         "ripgrep"
         "fd"

@@ -1,0 +1,2 @@
+#!/bin/sh
+st -c 'LunarVim' -e lvim 
