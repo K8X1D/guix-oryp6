@@ -35,6 +35,13 @@
    ;;"font-fira-code"
    ;;"font-fira-sans"
 
+	 ;;; Pdf
+	 "okular" ;; Document viewer  
+
+	 ;;;; Themes
+   "breeze-icons" ;; Default KDE Plasma 5 icon theme
+	 "breeze-gtk" ;; Default KDE Plasma theme (GTK+ port)
+
    ;;;; Icons
    ;;"breeze-icons"
    ;;"hicolor-icon-theme"

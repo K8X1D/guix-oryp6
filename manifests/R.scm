@@ -18,6 +18,7 @@
    "r-plyr"
    "r-dplyr"
    "r-purrr"
+   "r-renv"
    "r-furrr"
    "r-rjson"
    "r-profvis"

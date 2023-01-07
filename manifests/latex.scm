@@ -28,5 +28,7 @@
    "texlive-latex-fancyhdr";; Extensive control of page headers and footers in LaTeX2e
    "texlive-times" ;; URW Base 35 font pack for LaTeX
    "texlive-csquotes" ;; Context sensitive quotation facilities  
-   "biber" ;; Backend for the BibLaTeX citation management tool
+	 "biber" ;; Backend for the BibLaTeX citation management tool
+	 "texlive-latex-natbib" ;; Flexible bibliography support
+	 "texlive-latex-multirow" ;; Create tabular cells spanning multiple rows
    ))

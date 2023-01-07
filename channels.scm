@@ -39,17 +39,17 @@
  ;; (channel
  ;;  (name 'guix-hpc-non-free)
  ;;  (url "https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free.git"))
- ; )
+                                        ; )
 
-(channel
- (name 'k8x1d)
- (url "https://gitlab.com/oryp6/guix_set-up/guix-channel.git")
- (introduction
-  (make-channel-introduction
-   "1f836893d03174d1d6a247a37cb8b54b5057cb5e"
-   (openpgp-fingerprint
-    "A180 8C8D E727 2D87 15CD  AB96 39AA 7B97 9BCC 55C5"))))
-(channel
+ (channel
+  (name 'k8x1d)
+  (url "https://gitlab.com/oryp6/guix_set-up/guix-channel.git")
+  (introduction
+   (make-channel-introduction
+    "1f836893d03174d1d6a247a37cb8b54b5057cb5e"
+    (openpgp-fingerprint
+     "A180 8C8D E727 2D87 15CD  AB96 39AA 7B97 9BCC 55C5"))))
+ (channel
   (name 'emacs)
   (url "https://github.com/babariviere/guix-emacs")
   (introduction
@@ -57,5 +57,13 @@
     "72ca4ef5b572fea10a4589c37264fa35d4564783"
     (openpgp-fingerprint
      "261C A284 3452 FB01 F6DF  6CF4 F9B7 864F 2AB4 6F18"))))
-
+ (channel
+  (name 'flat)
+  (url "https://github.com/flatwhatson/guix-channel.git")
+  (commit "b62ba3214ed0f781e2d6015044ae8a4a1bd5c7d7")
+  (introduction
+   (make-channel-introduction
+    "33f86a4b48205c0dc19d7c036c85393f0766f806"
+    (openpgp-fingerprint
+     "736A C00E 1254 378B A982  7AF6 9DBE 8265 81B6 4490"))))
  )

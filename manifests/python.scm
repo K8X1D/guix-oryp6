@@ -4,8 +4,7 @@
    "python-pip"
 
 
-   ;; yt-dlp
-   "ffmpeg"
+   "yt-dlp" ;; Download videos from YouTube.com and other sites
 
    ;; bin
    "python-pandas"
