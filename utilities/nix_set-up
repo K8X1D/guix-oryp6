@@ -2,14 +2,17 @@
 nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
 nix-env -iA \
-	nixpkgs.zotero \
-	nixpkgs.protonmail-bridge \
-	nixpkgs.system76-keyboard-configurator \
-	nixpkgs.vscodium \
+	nixpkgs.brave
 	nixpkgs.calibre \
 	nixpkgs.neovim \
+	nixpkgs.protonmail-bridge \
+	nixpkgs.system76-keyboard-configurator \
 	nixpkgs.texlab \
 	nixpkgs.tree-sitter \
+	nixpkgs.vscodium \
 	nixpkgs.zathura
+	nixpkgs.zoom \
+	nixpkgs.zotero \
 
 ln -s /nix/var/nix/profiles/per-user/k8x1d/profile ~/.nix-profile
+ln -s ~/.nix-profile/share/applications/* ~/.local/share/applications/
