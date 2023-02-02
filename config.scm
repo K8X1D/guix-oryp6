@@ -19,18 +19,19 @@
 ;; Services modules
 (use-service-modules
  desktop      ;; desktop
- linux	      ;; module-loader
+ linux     ;; module-loader
  file-sharing ;; transmission
- xorg	      ;; xorg-configuration
- nix	      ;; nix
- docker	      ;; docker
+ xorg      ;; xorg-configuration
+ nix      ;; nix
+ docker      ;; docker
  networking   ;; network-manager
- cups	      ;; cups
- audio	      ;; mpd
+ cups     ;; cups
+ audio      ;; mpd
  databases    ;; postgresql
- pm	      ;; tlp, thermald
- sddm	      ;;sddm
+ pm      ;; tlp, thermald
+ sddm      ;;sddm
  shepherd     ;;shepherd
+ mcron
  )
 
 ;; Packages modules
@@ -51,6 +52,10 @@
  ;;pulseaudio ;; pamixer
  freedesktop ;; libappindicator
  xdisorg ;; wl-clipboard
+ image-viewers ;; imv
+ display-managers ;; sddm theme
+ qt ;; qtwayland
+ music ;; playerctl
  )
 
 (define nvidia-dgpu.conf
@@ -129,6 +134,20 @@
    "81-backlight.rules"
    (string-append "SUBSYSTEM==\"backlight\", ACTION==\"add\", KERNEL==\"acpi_video0\", ATTR{brightness}=\"1\"")))
 
+
+
+
+
+;; Services definitions ;;
+;; Collect garbage
+(define garbage-collector-job
+  ;; Collect garbage 5 minutes after 10 am every day.
+  ;; The job's action is a shell command.
+  #~(job "5 10 * * *"            ;Vixie cron syntax
+         "guix gc -F 20G"))
+
+
+;; Destop services
 (define %my-desktop-services
   (modify-services %desktop-services
                    (udev-service-type config =>
@@ -180,6 +199,12 @@
                    (delete gdm-service-type)
                    ))
 
+;; Modules configurations
+(define nvidia-pm-config
+  (plain-file "nvidia-pm.conf"
+              "options nvidia \"NVreg_DynamicPowerManagement=0x02\""))
+
+
 (operating-system
 
  (host-name "oryp6")
@@ -194,7 +219,7 @@
                     '(
                       ;; Nvidia set-up
                       "nvidia_drm.modeset=1"
-                      "nvidia.NVreg_DynamicPowerManagement=0x02"
+                      "nvidia.NVreg_DynamicPowerManagement=0x02" ;; Cause drive not been loaded sometimes...
                       "modprobe.blacklist=nouveau"
                       "modprobe.blacklist=i2c_nvidia_gpu"
                       "modprobe.blacklist=pcspkr" ;; "stop Error: Driver 'pcspkr' is already registered, aborting..." message
@@ -206,7 +231,7 @@
                       "resume=/dev/sda2"
                       "nmi_watchdog=0")
                     %default-kernel-arguments))
- (kernel-loadable-modules (list nvidia-module))
+ (kernel-loadable-modules (list nvidia-module v4l2loopback-linux-module))
  (initrd microcode-initrd)
  (initrd-modules %base-initrd-modules)
  ;; test for resume... dont't work
@@ -220,8 +245,8 @@
               (targets '("/boot/efi"))
               (timeout 2)
               (theme (grub-theme
-                      (inherit (grub-theme))
-                      (gfxmode '("1920x1200x32"))))
+                      ;;(image (local-file "grub-bg.jpg"))
+                      (resolution '(1920 . 1080))))
               (keyboard-layout my-keyboard-layout)
               (menu-entries (list
                              (menu-entry
@@ -276,18 +301,43 @@
               %base-user-accounts))
 
  (packages (append (list
-                    ;; window managers
-                    i3-gaps i3status dmenu
+                    ;; Desktop Environments ;;
+
+                    ;; I3
+                    i3-gaps i3status dmenu i3lock-color
+
+                    ;; EXWM
                     ;;emacs-next emacs-exwm emacs-desktop-environment xhost
-                    xmonad-next xmobar ghc-xmonad-contrib-next ghc
+
+                    ;; Xmonad
+                    xmonad-next ;; wm
+                    xmobar
+                    ghc-xmonad-contrib-next
+                    ghc
+                    alsa-utils
+                    scrot
+                    playerctl ;; Control MPRIS-supporting media player applications
+                    brightnessctl ;; Backlight and LED brightness control
+
+
+                    ;; Dwm
                     k8x1d-dwm k8x1d-st k8x1d-slstatus slock
                     ;; terminal emulator
                     xterm
 
-                    ;; sway set-up
-                    sway swaylock-effects swayidle swaybg foot grimshot wl-clipboard fuzzel
-                    waybar libappindicator
+                    ;;;; sway set-up
+                    ;; baseline
+                    sway swaylock-effects swayidle swaybg
+                    ;; utilities
+                    foot grimshot wl-clipboard xlsclients waybar libappindicator
                     ;;pamixer lm-sensors
+
+                    ;;;; Xorg/Wayland compatibles programs
+                    imv ;; Image viewer for tiling window managers
+                    rofi-wayland ;; Application launcher
+                    redshift-wayland ;; Adjust the color temperature of your screen (with Wayland support)
+                    alacritty ;; GPU-accelerated terminal emulator
+                    qtwayland ;; Qt Wayland module, for sddm
 
                     ;; utilities
                     acpi
@@ -313,6 +363,12 @@
                     ;; Drivers
                     nvidia-driver
                     nvidia-libs
+
+                    ;; Linux modules
+                    v4l2loopback-linux-module ;;  Linux kernel module to create virtual V4L2 video devices, give access to virtual cam on obs, see https://bugs.archlinux.org/task/69918
+
+                    ;; Themes
+                    ;;guix-simplyblack-sddm-theme
                     ;; For user mounts
                     gvfs
                     ;; for HTTPS access
@@ -320,13 +376,20 @@
                    %base-packages))
 
  (services (cons*
+            ;; loopback
+            (service kernel-module-loader-service-type
+                     '("v4l2loopback"))
             ;; ;; Nvidia
             (service nvidia-service-type)
+            ;; TODO not detected... Investiguate...
+            (simple-service 'nvidia-pm-config etc-service-type
+                            (list `("modprobe.d/nvidia-pm.conf"
+                                    ,nvidia-pm-config)))
             ;; Nix
             (service nix-service-type)
             ;; PAM
             (screen-locker-service slock "slock")
-            ;;(screen-locker-service i3lock-color "i3lock")
+            (screen-locker-service i3lock-color "i3lock")
             (screen-locker-service swaylock-effects "swaylock")
             ;; Databases
             (service docker-service-type) ;; TODO: investigate when high increase startup-time, TODO: change data-root to save space on root, TODO building problems, removed tmp
@@ -402,10 +465,15 @@
                       ))
             (service thermald-service-type)
             ;; Login manager
+            ;; removed for test with dwl...
             (service sddm-service-type
                      (sddm-configuration
+                      (display-server "wayland")
                       (themes-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/themes")
-                      (theme "sugar-dark")
+                      (theme "sddm-chili")
+                      (faces-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/faces")
+                      ;;(theme "sugar-dark")
+                      ;;(theme "guix-simplyblack-sddm")
                       (sessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/wayland-sessions")
                       (xsessions-directory "/extension/Work/Documents/Developpement/Logiciels/OS/2022/A/Guix/sddm/x-sessions")
                       (xorg-configuration my-xorg-conf)))
@@ -417,6 +485,16 @@
             ;; 				(xorg-configuration my-xorg-conf)))
             ;; ;; ;; Others desktops utilities
             ;;(service gnome-keyring-service-type)
+
+            ;; Custom services
+            (simple-service 'my-cron-jobs
+                            mcron-service-type
+                            (list garbage-collector-job
+                                  ))
+
+
+
+
             %my-desktop-services))
  ;; Allow resolution of '.local' host names with mDNS.
  (name-service-switch %mdns-host-lookup-nss))
