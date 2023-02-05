@@ -304,7 +304,7 @@
                     ;; Desktop Environments ;;
 
                     ;; I3
-                    i3-gaps i3status dmenu i3lock-color
+                    i3-gaps i3status dmenu i3lock-color polybar xss-lock
 
                     ;; EXWM
                     ;;emacs-next emacs-exwm emacs-desktop-environment xhost
@@ -415,14 +415,14 @@
                               (name "pulse audio")
                               (type "pulse"))))
                       (user "k8x1d")
-                      (music-dir "~/Music")
-                      (playlist-dir "~/.config/mpd/playlists")
+                      (music-directory "~/Music")
+                      (playlist-directory "~/.config/mpd/playlists")
                       (db-file "~/.config/mpd/database")
                       (state-file "~/.config/mpd/state")
                       (sticker-file "~/.config/mpd/sticker.sql")
-                      (port "6600")
-                      (address "any")
+                      (default-port 6600)
                       ))
+
             ;; Torrents
             (service transmission-daemon-service-type
                      (transmission-daemon-configuration

@@ -213,7 +213,7 @@ are also provided for checking the LaTeX parts of CWEB documents.")
      "texlive-latex-trimspaces" ;; Trim spaces around an argument or within a macro
      "texlive-latex-parskip" ;; Layout with zero \parindent, non-zero \parskip
      "texlive-lm-math" ;; OpenType maths fonts for Latin Modern
-		 "texlive-fonts-extra"
+     "texlive-fonts-latex" ;; Collection of fonts used in LaTeX distributions
      ))
   (packages->manifest (list
                        texlive-extsizes
