@@ -304,7 +304,7 @@
                     ;; Desktop Environments ;;
 
                     ;; I3
-                    i3-gaps i3status dmenu i3lock-color polybar xss-lock
+                    i3-wm i3status dmenu i3lock-color polybar xss-lock
 
                     ;; EXWM
                     ;;emacs-next emacs-exwm emacs-desktop-environment xhost
